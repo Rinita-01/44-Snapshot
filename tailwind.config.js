@@ -1,4 +1,4 @@
-﻿/** @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"] ,
   theme: {
@@ -20,6 +20,15 @@ export default {
       },
       backgroundImage: {
         app: "radial-gradient(circle at top, #eef2ff, #f5f6fa 60%, #f8fafc 100%)"
+      },
+      keyframes: {
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" }
+        }
+      },
+      animation: {
+        "fade-up": "fade-up 0.6s ease-out"
       }
     }
   },

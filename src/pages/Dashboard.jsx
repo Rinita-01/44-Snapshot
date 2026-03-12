@@ -1,64 +1,176 @@
-import React from "react";
-import { StatCard, InfoCard } from "../components/Cards.jsx";
-import { SparkBar, LineChart } from "../components/Charts.jsx";
-import { stats, charts } from "../data/mock.js";
+import React, { useEffect, useState } from "react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import {
+  UsersIcon,
+  BoltIcon,
+  DocumentTextIcon,
+  CloudIcon,
+  ExclamationTriangleIcon
+} from "@heroicons/react/24/outline";
+import StatsCard from "../components/StatsCard.jsx";
+import ChartCard from "../components/ChartCard.jsx";
+import { SkeletonCard, SkeletonChart } from "../components/Skeletons.jsx";
+import {
+  stats,
+  userGrowthData,
+  revenueData,
+  documentCategoryData,
+  recentActivity
+} from "../data/dummyData.js";
+
+const iconMap = {
+  totalUsers: UsersIcon,
+  activeSubscriptions: BoltIcon,
+  documents: DocumentTextIcon,
+  storage: CloudIcon,
+  expiring: ExclamationTriangleIcon
+};
+
+const pieColors = ["#0f172a", "#2563eb", "#22c55e", "#f59e0b", "#f43f5e"];
 
 export default function Dashboard() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <StatCard title="Total Users" value={stats.totalUsers} delta="+8.4%" hint="vs last month" accent="#2F80ED" />
-        <StatCard title="Active Subscriptions" value={stats.activeSubscriptions} delta="+4.1%" hint="monthly" accent="#27AE60" />
-        <StatCard title="Expiring Documents" value={stats.expiringDocs} delta="-2.5%" hint="30 days" accent="#F2994A" />
-        <StatCard title="Total Documents" value={stats.totalDocs} delta="+5.2%" hint="rolling 90 days" accent="#9B51E0" />
-        <StatCard title="Storage Usage" value={stats.storageUsage} delta="+1.9%" hint="capacity" accent="#111827" />
-      </section>
+    <div className="space-y-8 animate-fade-up">
+      <div>
+        <div className="text-2xl font-semibold">Overview</div>
+        <p className="mt-2 text-sm text-slate-500">
+          Real-time snapshot of growth, storage health, and revenue performance.
+        </p>
+      </div>
 
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <InfoCard title="Monthly New Users">
-          <SparkBar data={charts.monthlyUsers} color="#2F80ED" />
-        </InfoCard>
-        <InfoCard title="Subscription Revenue">
-          <LineChart data={charts.revenue} color="#27AE60" title="Revenue Growth" />
-        </InfoCard>
-        <InfoCard title="Document Upload Activity">
-          <LineChart data={charts.uploads} color="#9B51E0" title="Upload Activity" />
-        </InfoCard>
-      </section>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {loading
+          ? Array.from({ length: 5 }).map((_, idx) => <SkeletonCard key={idx} />)
+          : stats.map((item) => (
+              <StatsCard
+                key={item.id}
+                title={item.title}
+                value={item.value}
+                delta={item.delta}
+                caption={item.caption}
+                icon={iconMap[item.id]}
+                accent="#e2e8f0"
+              />
+            ))}
+      </div>
 
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <InfoCard title="Security Posture">
-          <div className="grid gap-4">
-            <div>
-              <div className="text-xs text-slate-500">Active JWT Sessions</div>
-              <div className="text-lg font-bold">1,240</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-500">Failed Login Attempts</div>
-              <div className="text-lg font-bold">38</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-500">Auto Logouts (24h)</div>
-              <div className="text-lg font-bold">112</div>
-            </div>
+      <div className="grid gap-6 lg:grid-cols-3">
+        {loading ? (
+          <SkeletonChart />
+        ) : (
+          <ChartCard
+            title="User growth"
+            subtitle="Monthly active users across all plans"
+            action="Last 7 months"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={userGrowthData}>
+                <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Line type="monotone" dataKey="users" stroke="#0f172a" strokeWidth={3} />
+              </LineChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
+
+        {loading ? (
+          <SkeletonChart />
+        ) : (
+          <ChartCard
+            title="Subscription revenue"
+            subtitle="Recurring monthly revenue trend"
+            action="USD"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={revenueData}>
+                <defs>
+                  <linearGradient id="revenue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+                <Tooltip />
+                <Area type="monotone" dataKey="revenue" stroke="#2563eb" fill="url(#revenue)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
+
+        {loading ? (
+          <SkeletonChart />
+        ) : (
+          <ChartCard
+            title="Document categories"
+            subtitle="Distribution of stored files"
+            action="% of total"
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={documentCategoryData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90}>
+                  {documentCategoryData.map((entry, index) => (
+                    <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        )}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-2">
+          <div className="text-sm font-semibold text-slate-800">Operational highlights</div>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {[
+              { label: "Document uploads", value: "14,230", note: "Last 7 days" },
+              { label: "QR shares", value: "2,184", note: "Last 7 days" },
+              { label: "Expiry alerts sent", value: "3,418", note: "Next 30 days" }
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-xs text-slate-500">{item.label}</div>
+                <div className="mt-2 text-lg font-semibold text-slate-900">{item.value}</div>
+                <div className="text-xs text-slate-500">{item.note}</div>
+              </div>
+            ))}
           </div>
-        </InfoCard>
-        <InfoCard title="Document Categories">
-          <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white">Motor Insurance</span>
-            <span className="rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">Health Insurance</span>
-            <span className="rounded-full bg-purple-500 px-3 py-1 text-xs font-semibold text-white">Personal Docs</span>
-            <span className="rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">Certificates</span>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="text-sm font-semibold text-slate-800">Recent activity</div>
+          <div className="mt-4 space-y-4">
+            {recentActivity.map((item) => (
+              <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="text-sm font-semibold text-slate-800">{item.title}</div>
+                <div className="text-xs text-slate-500">{item.detail}</div>
+                <div className="mt-2 text-[11px] font-semibold text-slate-400">{item.time}</div>
+              </div>
+            ))}
           </div>
-        </InfoCard>
-        <InfoCard title="System Notices">
-          <ul className="list-disc space-y-2 pl-4 text-sm">
-            <li>Stripe billing webhook queue healthy.</li>
-            <li>Apple Pay reconciliation completed.</li>
-            <li>Storage usage alert: 12 users above 90%.</li>
-          </ul>
-        </InfoCard>
-      </section>
+        </div>
+      </div>
     </div>
   );
 }

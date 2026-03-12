@@ -75,7 +75,7 @@ export default function AdminManagement() {
         <ul className="mt-3 list-disc space-y-2 pl-4 text-sm">
           {adminLogs.map((log) => (
             <li key={log.id}>
-              {log.date} — {log.action}
+              {log.date} - {log.action}
             </li>
           ))}
         </ul>

@@ -1,15 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider.jsx";
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("super@walletadmin.com");
+  const [password, setPassword] = useState("Secure@123");
   const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
 
   const passwordValid = /^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(password);
 
@@ -28,150 +30,211 @@ export default function Login() {
     navigate("/dashboard", { replace: true });
   };
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-[#09090f] text-slate-100">
-      <div className="pointer-events-none absolute -top-40 left-10 h-96 w-96 rounded-full bg-emerald-500/30 blur-[120px]" />
-      <div className="pointer-events-none absolute -bottom-48 right-10 h-[30rem] w-[30rem] rounded-full bg-indigo-500/30 blur-[130px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.08),_transparent_45%)]" />
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
-      <div className="relative mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-6 py-12 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="flex flex-col gap-6">
+  const handleForgotSend = () => {
+    if (!forgotEmail.trim()) {
+      setError("Please enter an email to receive the OTP.");
+      return;
+    }
+    setError("");
+    setForgotSent(true);
+  };
+
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-app text-slate-900">
+      <div className="pointer-events-none absolute -top-24 right-8 h-80 w-80 rounded-full bg-slate-900/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 left-10 h-[28rem] w-[28rem] rounded-full bg-slate-900/5 blur-[130px]" />
+
+      <div className="relative mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-6 py-12 lg:grid-cols-[0.95fr_1.05fr]">
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white/95 p-1 shadow-[0_10px_30px_rgba(16,185,129,0.35)]">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-white p-1 shadow-sm">
               <img src="/logo.png" alt="44 Snapshot" className="h-full w-full rounded-xl object-contain" />
             </div>
             <div>
               <div className="text-base font-semibold tracking-wide">44 Snapshot</div>
-              <div className="text-xs uppercase tracking-[0.3em] text-emerald-200/80">Admin Console</div>
+              <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Admin Console</div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h1 className="text-3xl font-semibold leading-tight md:text-4xl">
-              Guarded access to your most sensitive wallet operations.
+          <div className="mt-6 space-y-2">
+            <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Secure login</div>
+            <h1 className="text-2xl font-semibold text-slate-900">
+              {forgotMode ? "Reset access with OTP" : "Sign in to the admin dashboard"}
             </h1>
-            <p className="max-w-lg text-sm text-slate-300">
-              Centralize audits, approve high-risk flows, and supervise user activity with RBAC and encrypted session control.
+            <p className="text-sm text-slate-500">
+              {forgotMode
+                ? "Enter your email and we’ll send a one-time OTP to verify your identity."
+                : "Use your admin credentials to manage users, documents, and subscriptions."}
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              { label: "Realtime Alerts", value: "Instant" },
-              { label: "Sessions", value: "JWT + MFA" },
-              { label: "Compliance", value: "SOC-ready" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur"
+          {forgotMode ? (
+            <div className="mt-6 grid gap-4">
+              <label className="text-sm text-slate-600">
+                Email address
+                <input
+                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+                  type="email"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  placeholder="admin@44snapshot.com"
+                  required
+                />
+              </label>
+
+              {error ? (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+                  {error}
+                </div>
+              ) : null}
+
+              <button
+                type="button"
+                className="h-11 w-full rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                onClick={handleForgotSend}
               >
-                <div className="text-xs uppercase tracking-[0.2em] text-slate-400">{item.label}</div>
-                <div className="mt-2 text-base font-semibold text-white">{item.value}</div>
+                Send OTP
+              </button>
+
+              <button
+                type="button"
+                className="text-sm font-semibold text-slate-600 hover:text-slate-900"
+                onClick={() => {
+                  setForgotMode(false);
+                  setForgotSent(false);
+                  setError("");
+                }}
+              >
+                Back to Sign in
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+              <label className="text-sm text-slate-600">
+                Email
+                <input
+                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@44snapshot.com"
+                  required
+                />
+              </label>
+              <label className="text-sm text-slate-600">
+                Password
+                <input
+                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="**********"
+                  required
+                />
+                <span className={passwordValid ? "text-xs text-emerald-600" : "text-xs text-amber-600"}>
+                  Password must include uppercase, number, symbol.
+                </span>
+              </label>
+              <label className="flex items-center justify-between text-sm text-slate-500">
+                <span className="flex items-center gap-2">
+                  <input
+                    className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                  Remember me
+                </span>
+                <button
+                  type="button"
+                  className="text-sm text-slate-600 hover:text-slate-900"
+                  onClick={() => {
+                    setForgotMode(true);
+                    setForgotSent(false);
+                    setError("");
+                  }}
+                >
+                  Forgot password?
+                </button>
+              </label>
+
+              {error ? (
+                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
+                  {error}
+                </div>
+              ) : null}
+
+              <button
+                type="submit"
+                className="h-11 w-full rounded-xl bg-slate-900 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+              >
+                Login
+              </button>
+            </form>
+          )}
+
+          {forgotSent ? (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+              OTP sent to your email. (Demo)
+            </div>
+          ) : null}
+
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
+            Demo Accounts: <span className="font-semibold text-slate-900">super@walletadmin.com</span> / Secure@123
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="text-xs uppercase tracking-[0.3em] text-slate-400">Platform overview</div>
+            <h2 className="mt-3 text-2xl font-semibold text-slate-900">One console for secure wallet oversight</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Review document pipelines, subscription health, and QR sharing activity with real-time signals.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {[
+              { label: "Active users", value: "128,480", note: "last 30 days" },
+              { label: "Revenue", value: "$68.4K", note: "monthly recurring" },
+              { label: "Documents", value: "2.4M", note: "securely stored" },
+              { label: "Alerts", value: "3,248", note: "expiry window" }
+            ].map((item) => (
+              <div key={item.label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="text-xs text-slate-400">{item.label}</div>
+                <div className="mt-2 text-lg font-semibold text-slate-900">{item.value}</div>
+                <div className="text-xs text-slate-500">{item.note}</div>
               </div>
             ))}
           </div>
 
-          <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-white/5 p-5">
-            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-emerald-200/80">
-              <span>Security Pulse</span>
-              <span>Last 24h</span>
+          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-400">
+              <span>Compliance readiness</span>
+              <span>Updated today</span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
               {[
-                { label: "Approvals", value: "128" },
-                { label: "Flags", value: "3" },
-                { label: "Latency", value: "0.7s" },
+                { label: "MFA coverage", value: "92%" },
+                { label: "Policy reviews", value: "14 queued" },
+                { label: "Audit logs", value: "Realtime" }
               ].map((item) => (
-                <div key={item.label} className="rounded-xl bg-black/20 px-3 py-2">
-                  <div className="text-xs text-slate-400">{item.label}</div>
-                  <div className="text-lg font-semibold text-white">{item.value}</div>
+                <div key={item.label} className="rounded-xl bg-slate-50 px-3 py-2">
+                  <div className="text-xs text-slate-500">{item.label}</div>
+                  <div className="text-base font-semibold text-slate-900">{item.value}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
-
-        <div className="rounded-3xl border border-white/10 bg-white/10 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.55)] backdrop-blur">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm uppercase tracking-[0.3em] text-slate-300">Welcome back</div>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Sign in</h2>
-            </div>
-            <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-emerald-200/80">
-              Verified Console
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
-            <label className="text-sm text-slate-200">
-              Email
-              <input
-                className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-black/30 px-4 text-sm text-white placeholder:text-slate-500 focus:border-emerald-400/60 focus:outline-none"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@securewallet.com"
-                required
-              />
-            </label>
-            <label className="text-sm text-slate-200">
-              Password
-              <input
-                className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-black/30 px-4 text-sm text-white placeholder:text-slate-500 focus:border-emerald-400/60 focus:outline-none"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••"
-                required
-              />
-              <span className={passwordValid ? "text-xs text-emerald-300" : "text-xs text-amber-300"}>
-                Password must include uppercase, number, symbol.
-              </span>
-            </label>
-            <label className="flex items-center justify-between text-sm text-slate-300">
-              <span className="flex items-center gap-2">
-                <input
-                  className="h-4 w-4 rounded border-white/20 bg-black/30 text-emerald-400 focus:ring-emerald-400/60"
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-                Remember me
-              </span>
-              <button
-                type="button"
-                className="text-sm text-emerald-200 hover:text-emerald-100"
-                onClick={() => setForgotSent(true)}
-              >
-                Forgot password?
-              </button>
-            </label>
-
-            {error ? (
-              <div className="rounded-xl border border-rose-400/30 bg-rose-500/20 px-3 py-2 text-xs text-rose-100">
-                {error}
-              </div>
-            ) : null}
-
-            <button
-              type="submit"
-              className="h-11 w-full rounded-xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 text-sm font-semibold text-slate-900 shadow-[0_12px_30px_rgba(45,212,191,0.35)] transition hover:translate-y-[-1px]"
-            >
-              Login
-            </button>
-          </form>
-
-          {forgotSent ? (
-            <div className="mt-4 rounded-xl border border-emerald-400/20 bg-emerald-500/15 px-3 py-2 text-xs text-emerald-100">
-              Reset link sent to your email. (Demo)
-            </div>
-          ) : null}
-
-          <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-xs text-slate-300">
-            Demo Accounts: <span className="font-semibold text-white">super@walletadmin.com</span> / Secure@123
-          </div>
-        </div>
       </div>
+
     </div>
   );
 }
