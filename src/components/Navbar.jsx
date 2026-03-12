@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { BellIcon, ChevronDownIcon, MagnifyingGlassIcon, Bars3Icon } from "@heroicons/react/24/outline";
 import { useAuth } from "./AuthProvider.jsx";
 import Modal from "./Modal.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function Navbar({ onMenuClick }) {
   const [open, setOpen] = useState(false);
   const [modal, setModal] = useState({ open: false, type: "" });
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const initials = user?.name
     ? user.name
         .split(" ")
@@ -66,7 +68,7 @@ export default function Navbar({ onMenuClick }) {
                   className="w-full rounded-lg px-3 py-2 text-left text-slate-600 hover:bg-slate-100"
                   onClick={() => {
                     setOpen(false);
-                    setModal({ open: true, type: "profile" });
+                    navigate("/profile");
                   }}
                   type="button"
                 >
@@ -100,13 +102,7 @@ export default function Navbar({ onMenuClick }) {
 
       <Modal
         open={modal.open}
-        title={
-          modal.type === "notifications"
-            ? "Notifications"
-            : modal.type === "profile"
-            ? "Admin Profile"
-            : "Preferences"
-        }
+        title={modal.type === "notifications" ? "Notifications" : "Preferences"}
         onClose={() => setModal({ open: false, type: "" })}
         actions={
           <button
@@ -128,27 +124,6 @@ export default function Navbar({ onMenuClick }) {
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
               New admin access request pending approval.
-            </div>
-          </div>
-        ) : null}
-
-        {modal.type === "profile" ? (
-          <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-            <div>
-              <div className="text-xs text-slate-400">Name</div>
-              <div className="font-semibold text-slate-900">{user?.name || "Ava Carter"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Role</div>
-              <div className="font-semibold text-slate-900">{user?.role || "Operations Admin"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Email</div>
-              <div className="font-semibold text-slate-900">{user?.email || "admin@44snapshot.com"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Last Login</div>
-              <div className="font-semibold text-slate-900">2026-03-12 09:40</div>
             </div>
           </div>
         ) : null}

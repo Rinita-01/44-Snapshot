@@ -13,6 +13,7 @@ import Subscriptions from "./pages/Subscriptions.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import ActivityLogs from "./pages/ActivityLogs.jsx";
 import Settings from "./pages/Settings.jsx";
+import Profile from "./pages/Profile.jsx";
 
 export default function App() {
   return (
@@ -35,9 +36,10 @@ export default function App() {
           <Route path="qr-sharing" element={<QRSharing />} />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="notifications" element={<Notifications />} />
-          <Route path="activity-logs" element={<ActivityLogs />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
+        <Route path="activity-logs" element={<ActivityLogs />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="profile" element={<Profile />} />
+      </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </AuthProvider>
