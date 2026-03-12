@@ -59,7 +59,9 @@ export default function Navbar({ onMenuClick }) {
               <span className="grid h-8 w-8 place-items-center rounded-full bg-slate-900 text-xs font-semibold text-white">
                 {initials}
               </span>
-              {user?.name || "Ava Carter"}
+              <span className="hidden max-w-[10rem] truncate sm:inline">
+                {user?.name || "Ava Carter"}
+              </span>
               <ChevronDownIcon className="h-4 w-4" />
             </button>
             {open ? (

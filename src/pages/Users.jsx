@@ -217,7 +217,7 @@ export default function Users() {
         />
       )}
 
-      <div className="flex items-center justify-between text-sm text-slate-500">
+      <div className="flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <div>
           Showing {paginated.length} of {filtered.length} users
         </div>
