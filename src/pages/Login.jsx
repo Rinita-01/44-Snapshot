@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../components/AuthProvider.jsx";
 
 export default function Login() {
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("super@walletadmin.com");
   const [password, setPassword] = useState("Secure@123");
@@ -29,12 +29,6 @@ export default function Login() {
     }
     navigate("/dashboard", { replace: true });
   };
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isAuthenticated, navigate]);
 
   const handleForgotSend = () => {
     if (!forgotEmail.trim()) {
