@@ -3,9 +3,6 @@ import { NavLink } from "react-router-dom";
 import {
   HomeIcon,
   UsersIcon,
-  DocumentTextIcon,
-  FolderIcon,
-  QrCodeIcon,
   CreditCardIcon,
   BellAlertIcon,
   ClipboardDocumentListIcon,
@@ -18,9 +15,6 @@ import Modal from "./Modal.jsx";
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: HomeIcon },
   { to: "/users", label: "Users", icon: UsersIcon },
-  { to: "/documents", label: "Documents", icon: DocumentTextIcon },
-  { to: "/folders", label: "Folders", icon: FolderIcon },
-  { to: "/qr-sharing", label: "QR Sharing", icon: QrCodeIcon },
   { to: "/subscriptions", label: "Subscriptions", icon: CreditCardIcon },
   { to: "/notifications", label: "Notifications", icon: BellAlertIcon },
   { to: "/activity-logs", label: "Activity Logs", icon: ClipboardDocumentListIcon },
@@ -153,7 +147,7 @@ export default function Sidebar({ open, onClose }) {
       >
         <div className="space-y-3 text-sm text-slate-600">
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-            +50 GB Add-on - ideal for power users and heavy scans.
+            +50 GB Add-on - ideal for power users and heavy usage.
           </div>
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             Annual Storage Bundle - discounted annual capacity boosts.

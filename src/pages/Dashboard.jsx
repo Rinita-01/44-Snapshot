@@ -7,38 +7,25 @@ import {
   Tooltip,
   ResponsiveContainer,
   AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell
+  Area
 } from "recharts";
 import {
   UsersIcon,
   BoltIcon,
-  DocumentTextIcon,
   CloudIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
 import StatsCard from "../components/StatsCard.jsx";
 import ChartCard from "../components/ChartCard.jsx";
 import { SkeletonCard, SkeletonChart } from "../components/Skeletons.jsx";
-import {
-  stats,
-  userGrowthData,
-  revenueData,
-  documentCategoryData,
-  recentActivity
-} from "../data/dummyData.js";
+import { stats, userGrowthData, revenueData, recentActivity } from "../data/dummyData.js";
 
 const iconMap = {
   totalUsers: UsersIcon,
   activeSubscriptions: BoltIcon,
-  documents: DocumentTextIcon,
   storage: CloudIcon,
-  expiring: ExclamationTriangleIcon
+  systemAlerts: ExclamationTriangleIcon
 };
-
-const pieColors = ["#0f172a", "#2563eb", "#22c55e", "#f59e0b", "#f43f5e"];
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(true);
@@ -73,7 +60,7 @@ export default function Dashboard() {
             ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-2">
         {loading ? (
           <SkeletonChart />
         ) : (
@@ -117,27 +104,6 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </ChartCard>
         )}
-
-        {loading ? (
-          <SkeletonChart />
-        ) : (
-          <ChartCard
-            title="Document categories"
-            subtitle="Distribution of stored files"
-            action="% of total"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={documentCategoryData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={90}>
-                  {documentCategoryData.map((entry, index) => (
-                    <Cell key={entry.name} fill={pieColors[index % pieColors.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -145,9 +111,9 @@ export default function Dashboard() {
           <div className="text-sm font-semibold text-slate-800">Operational highlights</div>
           <div className="mt-4 grid gap-4 md:grid-cols-3">
             {[
-              { label: "Document uploads", value: "14,230", note: "Last 7 days" },
-              { label: "QR shares", value: "2,184", note: "Last 7 days" },
-              { label: "Expiry alerts sent", value: "3,418", note: "Next 30 days" }
+              { label: "New signups", value: "6,412", note: "Last 7 days" },
+              { label: "Trial conversions", value: "1,284", note: "Last 7 days" },
+              { label: "Upgrade requests", value: "312", note: "Last 7 days" }
             ].map((item) => (
               <div key={item.label} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="text-xs text-slate-500">{item.label}</div>

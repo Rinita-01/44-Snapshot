@@ -144,25 +144,6 @@ export const storage = [
   }
 ];
 
-export const qrLogs = [
-  {
-    id: "QR-5001",
-    user: "Maria Gomez",
-    document: "Motor Insurance",
-    date: "2026-02-28",
-    scans: 5,
-    sharedWith: "AAA Insurance"
-  },
-  {
-    id: "QR-5002",
-    user: "Ethan Brooks",
-    document: "Health Insurance",
-    date: "2026-03-01",
-    scans: 2,
-    sharedWith: "City Clinic"
-  }
-];
-
 export const reminders = [
   {
     id: "REM-6001",

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { NoSymbolIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import { DataTable } from "../components/DataTable.jsx";
 import { Modal } from "../components/Modal.jsx";
 import { admins as seedAdmins, adminLogs } from "../data/mock.js";
@@ -58,13 +59,19 @@ export default function AdminManagement() {
         actions={(row) => (
           <div className="flex flex-wrap gap-2">
             <button
-              className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-100"
               onClick={() => openEdit(admins.find((a) => a.id === row.id))}
+              title="Edit"
             >
-              Edit
+              <PencilSquareIcon className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
             </button>
-            <button className="rounded-lg border border-slate-200 bg-white px-3 py-1 text-xs font-semibold">
-              Deactivate
+            <button
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
+              title="Deactivate"
+            >
+              <NoSymbolIcon className="h-4 w-4" />
+              <span className="sr-only">Deactivate</span>
             </button>
           </div>
         )}

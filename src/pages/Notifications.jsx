@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { EyeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { notifications } from "../data/dummyData.js";
@@ -8,8 +9,8 @@ export default function Notifications() {
 
   const columns = [
     { key: "user", label: "User" },
-    { key: "document", label: "Document" },
-    { key: "expiryDate", label: "Expiry Date" },
+    { key: "alert", label: "Alert" },
+    { key: "dueDate", label: "Due Date" },
     { key: "alertSent", label: "Alert Sent" }
   ];
 
@@ -19,8 +20,8 @@ export default function Notifications() {
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
-        <div className="text-2xl font-semibold">Notifications & Expiry Alerts</div>
-        <p className="mt-2 text-sm text-slate-500">Track reminders sent for upcoming document expirations.</p>
+        <div className="text-2xl font-semibold">Notifications & Alerts</div>
+        <p className="mt-2 text-sm text-slate-500">Track reminders sent for upcoming renewals and account alerts.</p>
       </div>
 
       <DataTable
@@ -29,18 +30,22 @@ export default function Notifications() {
         actions={(row) => (
           <div className="flex flex-wrap gap-2">
             <button
-              className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
               onClick={() => openModal("resend", row)}
               type="button"
+              title="Resend"
             >
-              Resend
+              <PaperAirplaneIcon className="h-4 w-4" />
+              <span className="sr-only">Resend</span>
             </button>
             <button
-              className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
               onClick={() => openModal("view", row)}
               type="button"
+              title="View"
             >
-              View
+              <EyeIcon className="h-4 w-4" />
+              <span className="sr-only">View</span>
             </button>
           </div>
         )}
@@ -74,12 +79,12 @@ export default function Notifications() {
               <div className="font-semibold text-slate-900">{modal.row.user}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">Document</div>
-              <div className="font-semibold text-slate-900">{modal.row.document}</div>
+              <div className="text-xs text-slate-400">Alert</div>
+              <div className="font-semibold text-slate-900">{modal.row.alert}</div>
             </div>
             <div>
-              <div className="text-xs text-slate-400">Expiry Date</div>
-              <div className="font-semibold text-slate-900">{modal.row.expiryDate}</div>
+              <div className="text-xs text-slate-400">Due Date</div>
+              <div className="font-semibold text-slate-900">{modal.row.dueDate}</div>
             </div>
             <div>
               <div className="text-xs text-slate-400">Alert Sent</div>
@@ -91,7 +96,7 @@ export default function Notifications() {
         {modal.type === "resend" && modal.row ? (
           <div className="mt-4 text-sm text-slate-600">
             Send a reminder to <span className="font-semibold text-slate-900">{modal.row.user}</span> for
-            <span className="font-semibold text-slate-900"> {modal.row.document}</span>?
+            <span className="font-semibold text-slate-900"> {modal.row.alert}</span>?
           </div>
         ) : null}
       </Modal>

@@ -3,7 +3,7 @@ import StatsCard from "../components/StatsCard.jsx";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { subscriptionRows as seedRows, subscriptionSummary } from "../data/dummyData.js";
-import { CreditCardIcon, CurrencyDollarIcon, SparklesIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { CreditCardIcon, CurrencyDollarIcon, DocumentArrowDownIcon, PencilSquareIcon, SparklesIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 
 const summaryIcons = [CurrencyDollarIcon, CreditCardIcon, UserGroupIcon, SparklesIcon];
 
@@ -82,18 +82,22 @@ export default function Subscriptions() {
         actions={(row) => (
           <div className="flex flex-wrap gap-2">
             <button
-              className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
               onClick={() => openInvoice(row)}
               type="button"
+              title="Invoice"
             >
-              Invoice
+              <DocumentArrowDownIcon className="h-4 w-4" />
+              <span className="sr-only">Invoice</span>
             </button>
             <button
-              className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
               onClick={() => openEdit(row)}
               type="button"
+              title="Edit"
             >
-              Edit
+              <PencilSquareIcon className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
             </button>
           </div>
         )}

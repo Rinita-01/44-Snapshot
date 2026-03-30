@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { activityLogs } from "../data/dummyData.js";
@@ -25,11 +26,13 @@ export default function ActivityLogs() {
         data={activityLogs}
         actions={(row) => (
           <button
-            className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
             onClick={() => setModal({ open: true, row })}
             type="button"
+            title="Details"
           >
-            Details
+            <InformationCircleIcon className="h-4 w-4" />
+            <span className="sr-only">Details</span>
           </button>
         )}
       />

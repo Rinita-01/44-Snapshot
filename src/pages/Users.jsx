@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import DataTable from "../components/DataTable.jsx";
 import Modal from "../components/Modal.jsx";
 import { SkeletonTable } from "../components/Skeletons.jsx";
@@ -12,7 +13,8 @@ const emptyForm = {
   joinDate: "2026-03-12",
   status: "Active",
   storageUsed: "0 GB",
-  lastLogin: "2026-03-12"
+  lastLogin: "2026-03-12",
+  price: "$0"
 };
 
 export default function Users() {
@@ -40,6 +42,7 @@ export default function Users() {
     { key: "name", label: "User Name" },
     { key: "email", label: "Email" },
     { key: "joinDate", label: "Join Date" },
+    { key: "price", label: "Price" },
     {
       key: "status",
       label: "Subscription Status",
@@ -67,26 +70,28 @@ export default function Users() {
   };
 
   const openEdit = (user) => {
-    setForm({
-      name: user.name,
-      email: user.email,
-      joinDate: user.joinDate,
-      status: user.status,
-      storageUsed: user.storageUsed,
-      lastLogin: user.lastLogin
-    });
+      setForm({
+        name: user.name,
+        email: user.email,
+        joinDate: user.joinDate,
+        status: user.status,
+        storageUsed: user.storageUsed,
+        lastLogin: user.lastLogin,
+        price: user.price
+      });
     setModal({ open: true, type: "edit", user });
   };
 
   const openView = (user) => {
-    setForm({
-      name: user.name,
-      email: user.email,
-      joinDate: user.joinDate,
-      status: user.status,
-      storageUsed: user.storageUsed,
-      lastLogin: user.lastLogin
-    });
+      setForm({
+        name: user.name,
+        email: user.email,
+        joinDate: user.joinDate,
+        status: user.status,
+        storageUsed: user.storageUsed,
+        lastLogin: user.lastLogin,
+        price: user.price
+      });
     setModal({ open: true, type: "view", user });
   };
 
@@ -183,34 +188,42 @@ export default function Users() {
           columns={columns}
           data={paginated}
           actions={(row) => (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center gap-2">
               <button
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
                 onClick={() => openView(row)}
                 type="button"
+                title="View"
               >
-                View
+                <EyeIcon className="h-4 w-4" />
+                <span className="sr-only">View</span>
               </button>
               <button
-                className="rounded-lg border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
                 onClick={() => openEdit(row)}
                 type="button"
+                title="Edit"
               >
-                Edit
+                <PencilSquareIcon className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
               </button>
               <button
-                className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
                 onClick={() => openSuspend(row)}
                 type="button"
+                title="Suspend"
               >
-                Suspend
+                <PauseCircleIcon className="h-4 w-4" />
+                <span className="sr-only">Suspend</span>
               </button>
               <button
-                className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
                 onClick={() => openDelete(row)}
                 type="button"
+                title="Delete"
               >
-                Delete
+                <TrashIcon className="h-4 w-4" />
+                <span className="sr-only">Delete</span>
               </button>
             </div>
           )}
@@ -340,6 +353,15 @@ export default function Users() {
                   <option key={item}>{item}</option>
                 ))}
               </select>
+            </label>
+            <label className="text-sm text-slate-600">
+              Price
+              <input
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={form.price}
+                onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))}
+                disabled={readOnly}
+              />
             </label>
             <label className="text-sm text-slate-600">
               Storage Used

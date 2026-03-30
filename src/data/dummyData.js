@@ -14,13 +14,6 @@ export const stats = [
     caption: "renewals in March"
   },
   {
-    id: "documents",
-    title: "Total Documents Stored",
-    value: "2.4M",
-    delta: "+3.1%",
-    caption: "stored securely"
-  },
-  {
     id: "storage",
     title: "Storage Usage",
     value: "812 TB",
@@ -28,11 +21,11 @@ export const stats = [
     caption: "of 1 PB pool"
   },
   {
-    id: "expiring",
-    title: "Expiring Documents",
-    value: "3,248",
-    delta: "-4.9%",
-    caption: "next 30 days"
+    id: "systemAlerts",
+    title: "System Alerts",
+    value: "18",
+    delta: "-12.5%",
+    caption: "open incidents"
   }
 ];
 
@@ -56,14 +49,6 @@ export const revenueData = [
   { month: "Jul", revenue: 67500 }
 ];
 
-export const documentCategoryData = [
-  { name: "Insurance", value: 38 },
-  { name: "Personal IDs", value: 22 },
-  { name: "Medical", value: 18 },
-  { name: "Travel", value: 12 },
-  { name: "Finance", value: 10 }
-];
-
 export const users = [
   {
     id: "u1",
@@ -72,7 +57,8 @@ export const users = [
     joinDate: "2025-06-18",
     status: "Active",
     storageUsed: "2.1 GB",
-    lastLogin: "2026-03-10"
+    lastLogin: "2026-03-10",
+    price: "$1,240"
   },
   {
     id: "u2",
@@ -81,7 +67,8 @@ export const users = [
     joinDate: "2025-09-03",
     status: "Trial",
     storageUsed: "520 MB",
-    lastLogin: "2026-03-09"
+    lastLogin: "2026-03-09",
+    price: "$0"
   },
   {
     id: "u3",
@@ -90,7 +77,8 @@ export const users = [
     joinDate: "2024-12-22",
     status: "Active",
     storageUsed: "4.8 GB",
-    lastLogin: "2026-03-11"
+    lastLogin: "2026-03-11",
+    price: "$2,980"
   },
   {
     id: "u4",
@@ -99,7 +87,8 @@ export const users = [
     joinDate: "2025-04-12",
     status: "Suspended",
     storageUsed: "310 MB",
-    lastLogin: "2026-02-18"
+    lastLogin: "2026-02-18",
+    price: "$640"
   },
   {
     id: "u5",
@@ -108,7 +97,8 @@ export const users = [
     joinDate: "2025-11-04",
     status: "Active",
     storageUsed: "1.3 GB",
-    lastLogin: "2026-03-12"
+    lastLogin: "2026-03-12",
+    price: "$1,420"
   },
   {
     id: "u6",
@@ -117,7 +107,8 @@ export const users = [
     joinDate: "2025-10-21",
     status: "Active",
     storageUsed: "3.2 GB",
-    lastLogin: "2026-03-08"
+    lastLogin: "2026-03-08",
+    price: "$2,115"
   },
   {
     id: "u7",
@@ -126,7 +117,8 @@ export const users = [
     joinDate: "2025-08-15",
     status: "Active",
     storageUsed: "2.9 GB",
-    lastLogin: "2026-03-07"
+    lastLogin: "2026-03-07",
+    price: "$1,760"
   },
   {
     id: "u8",
@@ -135,129 +127,8 @@ export const users = [
     joinDate: "2024-05-26",
     status: "Trial",
     storageUsed: "740 MB",
-    lastLogin: "2026-03-06"
-  }
-];
-
-export const documents = [
-  {
-    id: "d1",
-    name: "Auto Policy - AXA",
-    category: "Motor Insurance",
-    owner: "Mila Robertson",
-    uploadDate: "2026-02-22",
-    expiryDate: "2026-06-30",
-    size: "8.2 MB"
-  },
-  {
-    id: "d2",
-    name: "Health Card",
-    category: "Health Insurance",
-    owner: "Avery Brooks",
-    uploadDate: "2026-01-12",
-    expiryDate: "2027-01-11",
-    size: "1.4 MB"
-  },
-  {
-    id: "d3",
-    name: "Passport Scan",
-    category: "Personal Documents",
-    owner: "Iris Bennett",
-    uploadDate: "2025-12-05",
-    expiryDate: "2031-12-04",
-    size: "3.1 MB"
-  },
-  {
-    id: "d4",
-    name: "Travel Insurance",
-    category: "Travel",
-    owner: "Caleb Foster",
-    uploadDate: "2026-03-01",
-    expiryDate: "2026-03-28",
-    size: "2.7 MB"
-  },
-  {
-    id: "d5",
-    name: "Medical Report",
-    category: "Medical Records",
-    owner: "Layla Chen",
-    uploadDate: "2026-02-10",
-    expiryDate: "2026-08-10",
-    size: "6.5 MB"
-  },
-  {
-    id: "d6",
-    name: "Property Policy",
-    category: "Insurance",
-    owner: "Julian Carter",
-    uploadDate: "2026-01-28",
-    expiryDate: "2026-12-31",
-    size: "4.9 MB"
-  }
-];
-
-export const folders = [
-  {
-    id: "f1",
-    name: "Motor Insurance",
-    documents: 420,
-    storage: "92 GB",
-    color: "from-indigo-500/15 to-indigo-50"
-  },
-  {
-    id: "f2",
-    name: "Health Insurance",
-    documents: 318,
-    storage: "61 GB",
-    color: "from-emerald-500/15 to-emerald-50"
-  },
-  {
-    id: "f3",
-    name: "Travel",
-    documents: 210,
-    storage: "33 GB",
-    color: "from-amber-500/15 to-amber-50"
-  },
-  {
-    id: "f4",
-    name: "Personal Documents",
-    documents: 512,
-    storage: "120 GB",
-    color: "from-rose-500/15 to-rose-50"
-  },
-  {
-    id: "f5",
-    name: "Medical Records",
-    documents: 287,
-    storage: "74 GB",
-    color: "from-sky-500/15 to-sky-50"
-  }
-];
-
-export const qrShares = [
-  {
-    id: "q1",
-    document: "Auto Policy - AXA",
-    owner: "Mila Robertson",
-    generated: "2026-03-09 14:10",
-    scans: 12,
-    lastScanned: "2026-03-11 09:30"
-  },
-  {
-    id: "q2",
-    document: "Passport Scan",
-    owner: "Iris Bennett",
-    generated: "2026-03-08 10:42",
-    scans: 4,
-    lastScanned: "2026-03-10 18:02"
-  },
-  {
-    id: "q3",
-    document: "Medical Report",
-    owner: "Layla Chen",
-    generated: "2026-03-05 16:18",
-    scans: 7,
-    lastScanned: "2026-03-11 13:22"
+    lastLogin: "2026-03-06",
+    price: "$0"
   }
 ];
 
@@ -300,22 +171,22 @@ export const notifications = [
   {
     id: "n1",
     user: "Caleb Foster",
-    document: "Travel Insurance",
-    expiryDate: "2026-03-28",
+    alert: "Subscription renewal",
+    dueDate: "2026-03-28",
     alertSent: "2026-03-10"
   },
   {
     id: "n2",
     user: "Mila Robertson",
-    document: "Auto Policy - AXA",
-    expiryDate: "2026-06-30",
+    alert: "Payment retry",
+    dueDate: "2026-03-30",
     alertSent: "2026-03-08"
   },
   {
     id: "n3",
     user: "Layla Chen",
-    document: "Medical Report",
-    expiryDate: "2026-08-10",
+    alert: "Plan upgrade request",
+    dueDate: "2026-04-04",
     alertSent: "2026-03-07"
   }
 ];
@@ -331,21 +202,21 @@ export const activityLogs = [
   {
     id: "a2",
     user: "System",
-    action: "Document OCR batch completed",
+    action: "Nightly billing sync completed",
     date: "2026-03-11 09:05",
     ip: "10.10.8.44"
   },
   {
     id: "a3",
     user: "Support Bot",
-    action: "Sent expiry reminder notifications",
+    action: "Sent renewal reminder notifications",
     date: "2026-03-10 18:31",
     ip: "10.10.8.44"
   },
   {
     id: "a4",
     user: "Ava Carter",
-    action: "Reviewed user storage report",
+    action: "Reviewed account health report",
     date: "2026-03-10 12:09",
     ip: "172.16.34.22"
   }
@@ -361,8 +232,8 @@ export const subscriptionSummary = [
 export const recentActivity = [
   {
     id: "r1",
-    title: "Bulk document conversion completed",
-    detail: "2,430 PDFs converted for enterprise accounts.",
+    title: "Bulk data migration completed",
+    detail: "2,430 records moved to the new archive tier.",
     time: "2 hours ago"
   },
   {
