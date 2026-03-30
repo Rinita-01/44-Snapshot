@@ -42,7 +42,6 @@ export default function Navbar({ onMenuClick }) {
             />
           </div>
           <div className="relative">
-          <div className="relative">
             <button
               className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm"
               onClick={() => setOpen((prev) => !prev)}
