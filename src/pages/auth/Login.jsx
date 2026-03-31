@@ -5,13 +5,13 @@ import { useAuth } from "../../auth/auth-context"
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("patrarinita009@gmail.com");
-  const [password, setPassword] = useState("123456");
+  const [email, setEmail] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("12345678");
   const [error, setError] = useState("");
 
   // const passwordValid = /^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(password);
 
-  const passwordValid = password.length >= 6
+  const passwordValid = password.length >= 8
 
   const handleSubmit = async (event) => {
     event.preventDefault();
