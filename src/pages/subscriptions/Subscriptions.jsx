@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import StatsCard from "../../components/StatsCard.jsx";
-import DataTable from "../../components/DataTable.jsx";
-import Modal from "../../components/Modal.jsx";
+import StatsCard from "../../components/ui//StatsCard.jsx";
+import DataTable from "../../components/ui/DataTable.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import { subscriptionRows as seedRows, subscriptionSummary } from "../../data/dummyData.js";
 import { CreditCardIcon, CurrencyDollarIcon, DocumentArrowDownIcon, PencilSquareIcon, SparklesIcon, UserGroupIcon } from "@heroicons/react/24/outline";
 
@@ -23,10 +23,10 @@ export default function Subscriptions() {
       render: (row) => (
         <span
           className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === "Active"
-              ? "bg-emerald-50 text-emerald-700"
-              : row.status === "Trial"
-                ? "bg-amber-50 text-amber-700"
-                : "bg-slate-100 text-slate-600"
+            ? "bg-emerald-50 text-emerald-700"
+            : row.status === "Trial"
+              ? "bg-amber-50 text-amber-700"
+              : "bg-slate-100 text-slate-600"
             }`}
         >
           {row.status}

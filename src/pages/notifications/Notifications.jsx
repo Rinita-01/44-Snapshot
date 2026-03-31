@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { EyeIcon, PaperAirplaneIcon } from "@heroicons/react/24/outline";
-import DataTable from "../../components/DataTable.jsx";
-import Modal from "../../components/Modal.jsx";
+import DataTable from "../../components/ui/DataTable.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import { notifications } from "../../data/dummyData.js";
 
 export default function Notifications() {

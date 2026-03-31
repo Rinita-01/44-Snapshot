@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import DataTable from "../../components/DataTable.jsx";
-import Modal from "../../components/Modal.jsx";
+import DataTable from "../../components/ui/DataTable.jsx";
+import Modal from "../../components/ui/Modal.jsx";
 import { activityLogs } from "../../data/dummyData.js";
 
 export default function ActivityLogs() {

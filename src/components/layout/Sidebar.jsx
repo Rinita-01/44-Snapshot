@@ -10,7 +10,7 @@ import {
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../auth/AuthProvider.jsx";
-import Modal from "../Modal.jsx";
+import Modal from "../ui/Modal.jsx";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: HomeIcon },

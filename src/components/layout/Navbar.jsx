@@ -18,7 +18,7 @@ export default function Navbar({ onMenuClick }) {
     : "AC";
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/70 px-6 py-4 backdrop-blur relative">
+    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/70 px-6 py-4 backdrop-blur">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button

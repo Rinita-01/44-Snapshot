@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
-import DataTable from "../../components/DataTable.jsx";
-import Modal from "../../components/Modal.jsx";
-import { SkeletonTable } from "../../components/Skeletons.jsx";
+import DataTable from "../../components/ui/DataTable.jsx";
+import Modal from "../../components/ui/Modal.jsx";
+import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
 import { users as seedUsers } from "../../data/dummyData.js";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
@@ -49,10 +49,10 @@ export default function Users() {
       render: (row) => (
         <span
           className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === "Active"
-              ? "bg-emerald-50 text-emerald-700"
-              : row.status === "Trial"
-                ? "bg-amber-50 text-amber-700"
-                : "bg-rose-50 text-rose-700"
+            ? "bg-emerald-50 text-emerald-700"
+            : row.status === "Trial"
+              ? "bg-amber-50 text-amber-700"
+              : "bg-rose-50 text-rose-700"
             }`}
         >
           {row.status}

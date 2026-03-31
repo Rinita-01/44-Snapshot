@@ -15,9 +15,9 @@ import {
   CloudIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
-import StatsCard from "../../components/StatsCard.jsx";
-import ChartCard from "../../components/ChartCard.jsx";
-import { SkeletonCard, SkeletonChart } from "../../components/Skeletons.jsx";
+import StatsCard from "../../components/ui/StatsCard.jsx";
+import ChartCard from "../../components/ui/ChartCard.jsx";
+import { SkeletonCard, SkeletonChart } from "../../components/ui/Skeletons.jsx";
 import { stats, userGrowthData, revenueData, recentActivity } from "../../data/dummyData.js";
 
 const iconMap = {
