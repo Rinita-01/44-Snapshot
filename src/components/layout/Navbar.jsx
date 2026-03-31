@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BellIcon, ChevronDownIcon, MagnifyingGlassIcon, Bars3Icon } from "@heroicons/react/24/outline";
-import { useAuth } from "./AuthProvider.jsx";
+import { useAuth } from "../auth/AuthProvider.jsx";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar({ onMenuClick }) {
@@ -10,11 +10,11 @@ export default function Navbar({ onMenuClick }) {
   const navigate = useNavigate();
   const initials = user?.name
     ? user.name
-        .split(" ")
-        .map((part) => part[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
     : "AC";
 
   return (

@@ -15,10 +15,10 @@ import {
   CloudIcon,
   ExclamationTriangleIcon
 } from "@heroicons/react/24/outline";
-import StatsCard from "../components/StatsCard.jsx";
-import ChartCard from "../components/ChartCard.jsx";
-import { SkeletonCard, SkeletonChart } from "../components/Skeletons.jsx";
-import { stats, userGrowthData, revenueData, recentActivity } from "../data/dummyData.js";
+import StatsCard from "../../components/StatsCard.jsx";
+import ChartCard from "../../components/ChartCard.jsx";
+import { SkeletonCard, SkeletonChart } from "../../components/Skeletons.jsx";
+import { stats, userGrowthData, revenueData, recentActivity } from "../../data/dummyData.js";
 
 const iconMap = {
   totalUsers: UsersIcon,
@@ -48,16 +48,16 @@ export default function Dashboard() {
         {loading
           ? Array.from({ length: 5 }).map((_, idx) => <SkeletonCard key={idx} />)
           : stats.map((item) => (
-              <StatsCard
-                key={item.id}
-                title={item.title}
-                value={item.value}
-                delta={item.delta}
-                caption={item.caption}
-                icon={iconMap[item.id]}
-                accent="#e2e8f0"
-              />
-            ))}
+            <StatsCard
+              key={item.id}
+              title={item.title}
+              value={item.value}
+              delta={item.delta}
+              caption={item.caption}
+              icon={iconMap[item.id]}
+              accent="#e2e8f0"
+            />
+          ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

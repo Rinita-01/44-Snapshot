@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../components/AuthProvider.jsx";
+import { useAuth } from "../../components/auth/AuthProvider.jsx";
 
 export default function Profile() {
   const { user } = useAuth();

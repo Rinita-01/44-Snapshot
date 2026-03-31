@@ -1,6 +1,6 @@
 import React from "react";
-import { DataTable } from "../components/DataTable.jsx";
-import { storage } from "../data/mock.js";
+import { DataTable } from "../../components/DataTable.jsx";
+import { storage } from "../../data/mock.js";
 
 export default function Storage() {
   const rows = storage.map((row) => ({

@@ -1,6 +1,6 @@
 import React from "react";
-import { DataTable } from "../components/DataTable.jsx";
-import { reminders } from "../data/mock.js";
+import { DataTable } from "../../components/DataTable.jsx";
+import { reminders } from "../../data/mock.js";
 
 export default function Reminders() {
   const rows = reminders.map((row) => ({

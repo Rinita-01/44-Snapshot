@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { NoSymbolIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
-import { DataTable } from "../components/DataTable.jsx";
-import { Modal } from "../components/Modal.jsx";
-import { admins as seedAdmins, adminLogs } from "../data/mock.js";
+import { DataTable } from "../../components/DataTable.jsx";
+import { Modal } from "../../components/Modal.jsx";
+import { admins as seedAdmins, adminLogs } from "../../data/mock.js";
 import { ROLES } from "../components/AuthProvider.jsx";
 
 export default function AdminManagement() {

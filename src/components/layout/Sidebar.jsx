@@ -9,8 +9,8 @@ import {
   Cog6ToothIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
-import { useAuth } from "./AuthProvider.jsx";
-import Modal from "./Modal.jsx";
+import { useAuth } from "../auth/AuthProvider.jsx";
+import Modal from "../Modal.jsx";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: HomeIcon },
@@ -26,11 +26,11 @@ export default function Sidebar({ open, onClose }) {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const initials = user?.name
     ? user.name
-        .split(" ")
-        .map((part) => part[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
     : "AC";
   const linkClass = ({ isActive }) =>
     [
@@ -43,16 +43,14 @@ export default function Sidebar({ open, onClose }) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-30 bg-slate-900/30 transition-opacity lg:hidden ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-30 bg-slate-900/30 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         onClick={onClose}
         role="presentation"
       />
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-full w-72 flex-col border-r border-slate-200 bg-white px-6 py-6 transition-transform lg:translate-x-0 ${
-          open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed left-0 top-0 z-40 flex h-full w-72 flex-col border-r border-slate-200 bg-white px-6 py-6 transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">

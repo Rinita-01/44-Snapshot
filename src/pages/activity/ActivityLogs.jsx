@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
-import DataTable from "../components/DataTable.jsx";
-import Modal from "../components/Modal.jsx";
-import { activityLogs } from "../data/dummyData.js";
+import DataTable from "../../components/DataTable.jsx";
+import Modal from "../../components/Modal.jsx";
+import { activityLogs } from "../../data/dummyData.js";
 
 export default function ActivityLogs() {
   const [modal, setModal] = useState({ open: false, row: null });

@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from "react";
 import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
-import DataTable from "../components/DataTable.jsx";
-import Modal from "../components/Modal.jsx";
-import { SkeletonTable } from "../components/Skeletons.jsx";
-import { users as seedUsers } from "../data/dummyData.js";
+import DataTable from "../../components/DataTable.jsx";
+import Modal from "../../components/Modal.jsx";
+import { SkeletonTable } from "../../components/Skeletons.jsx";
+import { users as seedUsers } from "../../data/dummyData.js";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
 
@@ -48,13 +48,12 @@ export default function Users() {
       label: "Subscription Status",
       render: (row) => (
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${
-            row.status === "Active"
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === "Active"
               ? "bg-emerald-50 text-emerald-700"
               : row.status === "Trial"
-              ? "bg-amber-50 text-amber-700"
-              : "bg-rose-50 text-rose-700"
-          }`}
+                ? "bg-amber-50 text-amber-700"
+                : "bg-rose-50 text-rose-700"
+            }`}
         >
           {row.status}
         </span>
@@ -70,28 +69,28 @@ export default function Users() {
   };
 
   const openEdit = (user) => {
-      setForm({
-        name: user.name,
-        email: user.email,
-        joinDate: user.joinDate,
-        status: user.status,
-        storageUsed: user.storageUsed,
-        lastLogin: user.lastLogin,
-        price: user.price
-      });
+    setForm({
+      name: user.name,
+      email: user.email,
+      joinDate: user.joinDate,
+      status: user.status,
+      storageUsed: user.storageUsed,
+      lastLogin: user.lastLogin,
+      price: user.price
+    });
     setModal({ open: true, type: "edit", user });
   };
 
   const openView = (user) => {
-      setForm({
-        name: user.name,
-        email: user.email,
-        joinDate: user.joinDate,
-        status: user.status,
-        storageUsed: user.storageUsed,
-        lastLogin: user.lastLogin,
-        price: user.price
-      });
+    setForm({
+      name: user.name,
+      email: user.email,
+      joinDate: user.joinDate,
+      status: user.status,
+      storageUsed: user.storageUsed,
+      lastLogin: user.lastLogin,
+      price: user.price
+    });
     setModal({ open: true, type: "view", user });
   };
 
@@ -245,9 +244,8 @@ export default function Users() {
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
               key={idx}
-              className={`h-8 w-8 rounded-lg border ${
-                page === idx + 1 ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200"
-              }`}
+              className={`h-8 w-8 rounded-lg border ${page === idx + 1 ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200"
+                }`}
               onClick={() => setPage(idx + 1)}
             >
               {idx + 1}
@@ -269,12 +267,12 @@ export default function Users() {
           modal.type === "add"
             ? "Add User"
             : modal.type === "edit"
-            ? "Edit User"
-            : modal.type === "view"
-            ? "User Details"
-            : modal.type === "suspend"
-            ? "Suspend User"
-            : "Delete User"
+              ? "Edit User"
+              : modal.type === "view"
+                ? "User Details"
+                : modal.type === "suspend"
+                  ? "Suspend User"
+                  : "Delete User"
         }
         onClose={closeModal}
         actions={

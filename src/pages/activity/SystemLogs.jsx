@@ -1,6 +1,6 @@
 import React from "react";
-import { DataTable } from "../components/DataTable.jsx";
-import { systemLogs } from "../data/mock.js";
+import { DataTable } from "../../components/DataTable.jsx";
+import { systemLogs } from "../../data/mock.js";
 
 export default function SystemLogs() {
   const rows = systemLogs.map((row) => ({
