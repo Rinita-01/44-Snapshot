@@ -1,14 +1,38 @@
-import React from "react";
-import { useAuth } from "../../components/auth/AuthProvider.jsx";
+﻿import React, { useEffect, useState } from "react";
+import { useAuth } from "../../auth/auth-context";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProfile = async () => {
+      if (!refreshProfile || user) return;
+      setLoading(true);
+      const result = await refreshProfile();
+      if (isMounted && !result.ok) {
+        setError(result.message);
+      }
+      if (isMounted) setLoading(false);
+    };
+
+    loadProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshProfile, user]);
 
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
         <div className="text-2xl font-semibold">Admin Profile</div>
         <p className="mt-2 text-sm text-slate-500">Manage your profile details and access preferences.</p>
+        {loading ? <div className="mt-3 text-xs text-slate-400">Loading profile...</div> : null}
+        {error ? <div className="mt-3 text-xs text-rose-500">{error}</div> : null}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -19,26 +43,33 @@ export default function Profile() {
               Full Name
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                defaultValue={user?.name || "Ava Carter"}
+                value={user?.name || "Ava Carter"}
+                readOnly
               />
             </label>
             <label className="text-sm text-slate-600">
               Email
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                defaultValue={user?.email || "admin@44snapshot.com"}
+                value={user?.email || "admin@44snapshot.com"}
+                readOnly
               />
             </label>
             <label className="text-sm text-slate-600">
               Role
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                defaultValue={user?.role || "Operations Admin"}
+                value={user?.role || "Operations Admin"}
+                readOnly
               />
             </label>
             <label className="text-sm text-slate-600">
               Location
-              <input className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" defaultValue="New York, USA" />
+              <input
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={user?.location || "New York, USA"}
+                readOnly
+              />
             </label>
           </div>
 

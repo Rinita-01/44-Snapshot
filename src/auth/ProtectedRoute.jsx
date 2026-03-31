@@ -1,16 +1,24 @@
-import React from "react";
+﻿import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./AuthProvider.jsx";
+import { useAuth } from "./auth-context";
 
 export function ProtectedRoute({ children, allowedRoles }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">
+        Checking session...
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
     return (
       <div className="mx-auto mt-16 max-w-xl rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-card">
         <h2 className="text-xl font-bold">Access Denied</h2>

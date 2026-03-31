@@ -9,7 +9,7 @@ import {
   Cog6ToothIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
-import { useAuth } from "../auth/AuthProvider.jsx";
+import { useAuth } from "../../auth/auth-context.js";
 import Modal from "../ui/Modal.jsx";
 
 const navItems = [

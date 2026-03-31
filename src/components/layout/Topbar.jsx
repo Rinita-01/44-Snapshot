@@ -14,6 +14,7 @@ export default function Topbar() {
           <div className="text-xs text-slate-500">44 Snapshot Platform Operations</div>
         </div>
       </div>
+
       <div className="flex flex-wrap items-center gap-3">
         <input
           className="h-10 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm md:w-64"

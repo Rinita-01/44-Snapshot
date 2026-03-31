@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { BellIcon, ChevronDownIcon, MagnifyingGlassIcon, Bars3Icon } from "@heroicons/react/24/outline";
-import { useAuth } from "../auth/AuthProvider.jsx";
+import { useAuth } from "../../auth/auth-context";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar({ onMenuClick }) {

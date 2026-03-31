@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../components/auth/AuthProvider"
+import { useAuth } from "../../auth/auth-context"
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("super@walletadmin.com");
-  const [password, setPassword] = useState("Secure@123");
-  const [remember, setRemember] = useState(true);
+  const [email, setEmail] = useState("patrarinita009@gmail.com");
+  const [password, setPassword] = useState("123456");
   const [error, setError] = useState("");
 
-  const passwordValid = /^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(password);
+  // const passwordValid = /^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(password);
 
-  const handleSubmit = (event) => {
+  const passwordValid = password.length >= 6
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     if (!passwordValid) {
-      setError("Password must be 8+ chars with uppercase, number, and symbol.");
+      // setError("Password must be 8+ chars with uppercase, number, and symbol.");
+      setPassword("Password must be 6+ characters")
       return;
     }
-    const result = login(email, password, remember);
+    const result = await login(email, password);
     if (!result.ok) {
       setError(result.message);
       return;
@@ -78,17 +80,7 @@ export default function Login() {
                 Password must include uppercase, number, symbol.
               </span>
             </label>
-            <label className="flex items-center justify-between text-sm text-slate-500">
-              <span className="flex items-center gap-2">
-                <input
-                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-400"
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-                Remember me
-              </span>
-            </label>
+            <div className="text-xs text-slate-400">Session is secured with server-side cookies.</div>
 
             {error ? (
               <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-600">
@@ -104,9 +96,9 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
-            Demo Accounts: <span className="font-semibold text-slate-900">super@walletadmin.com</span> / Secure@123
-          </div>
+          {/* <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
+            Demo Accounts: <span className="font-semibold text-slate-900">patrarinita009@gmail.com</span> / 123456
+          </div> */}
         </div>
       </div>
     </div>
