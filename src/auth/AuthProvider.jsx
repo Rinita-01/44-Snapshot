@@ -10,21 +10,32 @@ const getAccessTokenFromResponse = (data) =>
 const getUserFromResponse = (data) =>
   data?.user || data?.data?.user || data?.profile || data?.data?.profile;
 
-const normalizeUser = (user, email) => {
-  if (user && typeof user === "object") {
-    const nextUser = { ...user };
-    if (!nextUser.email && email) nextUser.email = email;
-    return nextUser;
-  }
-
-  if (!email) return null;
+const buildNameFromEmail = (email) => {
+  if (!email) return "";
 
   const namePart = email.split("@")[0] || "";
-  const name = namePart
+  return namePart
     .split(/[._-]/)
     .filter(Boolean)
     .map((part) => part[0]?.toUpperCase() + part.slice(1))
     .join(" ");
+};
+
+const normalizeUser = (user, email) => {
+  if (user && typeof user === "object") {
+    const nextUser = { ...user };
+    const resolvedEmail = nextUser.email || email;
+
+    if (!nextUser.email && resolvedEmail) nextUser.email = resolvedEmail;
+    if (!nextUser.name && resolvedEmail) {
+      nextUser.name = buildNameFromEmail(resolvedEmail) || resolvedEmail;
+    }
+
+    return nextUser;
+  }
+
+  if (!email) return null;
+  const name = buildNameFromEmail(email);
 
   return { name: name || email, email };
 };

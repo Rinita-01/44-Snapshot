@@ -24,14 +24,14 @@ const navItems = [
 export default function Sidebar({ open, onClose }) {
   const { user, logout } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const initials = user?.name
-    ? user.name
-      .split(" ")
+  const displayName = user?.name || user?.email || "Admin";
+  const displayRole = user?.role || "Signed-in user";
+  const initials = displayName
+    .split(" ")
       .map((part) => part[0])
       .join("")
       .slice(0, 2)
-      .toUpperCase()
-    : "AC";
+      .toUpperCase();
   const linkClass = ({ isActive }) =>
     [
       "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
@@ -78,8 +78,8 @@ export default function Sidebar({ open, onClose }) {
               {initials}
             </div>
             <div>
-              <div className="text-sm font-semibold">{user?.name || "Ava Carter"}</div>
-              <div className="text-xs text-slate-500">{user?.role || "Operations Admin"}</div>
+              <div className="text-sm font-semibold">{displayName}</div>
+              <div className="text-xs text-slate-500">{displayRole}</div>
             </div>
           </div>
         </div>
