@@ -6,6 +6,8 @@ import {
   CreditCardIcon,
   BellAlertIcon,
   ClipboardDocumentListIcon,
+  FolderPlusIcon,
+  FolderIcon,
   Cog6ToothIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
@@ -17,6 +19,8 @@ const navItems = [
   { to: "/users", label: "Users", icon: UsersIcon },
   { to: "/subscriptions", label: "Subscriptions", icon: CreditCardIcon },
   { to: "/notifications", label: "Notifications", icon: BellAlertIcon },
+  { to: "/folders", label: "Folders", icon: FolderIcon },
+  { to: "/reminders", label: "Reminders", icon: FolderPlusIcon },
   { to: "/activity-logs", label: "Activity Logs", icon: ClipboardDocumentListIcon },
   { to: "/settings", label: "Settings", icon: Cog6ToothIcon }
 ];
