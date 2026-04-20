@@ -4,11 +4,12 @@ import { useNavigate } from "react-router-dom";
 import FolderModal from "../../features/reminders/components/FolderModal.jsx";
 import FolderCard from "../../features/reminders/components/FolderCard.jsx";
 import { useReminderStore } from "../../features/reminders/context/ReminderContext.jsx";
+import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
 
 export default function Reminders() {
   const navigate = useNavigate();
   const [folderModalOpen, setFolderModalOpen] = useState(false);
-  const { folders, createFolder } = useReminderStore();
+  const { folders, createFolder, loading, error, isCreating } = useReminderStore();
 
   return (
     <>
@@ -31,17 +32,27 @@ export default function Reminders() {
           </button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {folders.map((folder) => (
-            <FolderCard
-              key={folder.id}
-              folder={folder}
-              onOpen={() => navigate(`/reminders/${folder.id}`)}
-            />
-          ))}
-        </div>
+        {error ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </div>
+        ) : null}
 
-        {!folders.length ? (
+        {loading ? (
+          <SkeletonTable />
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {folders.map((folder) => (
+              <FolderCard
+                key={folder.id}
+                folder={folder}
+                onOpen={() => navigate(`/reminders/${folder.id}`)}
+              />
+            ))}
+          </div>
+        )}
+
+        {!loading && !folders.length ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
             <div className="text-lg font-semibold text-slate-800">No folders yet</div>
             <div className="mt-2 text-sm text-slate-500">Create your first reminder folder using the top-right plus action.</div>
@@ -51,11 +62,12 @@ export default function Reminders() {
 
       <FolderModal
         onClose={() => setFolderModalOpen(false)}
-        onSubmit={(payload) => {
-          createFolder(payload);
+        onSubmit={async (payload) => {
+          await createFolder(payload);
           setFolderModalOpen(false);
         }}
         open={folderModalOpen}
+        isSubmitting={isCreating}
       />
     </>
   );
