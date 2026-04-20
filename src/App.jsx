@@ -18,39 +18,42 @@ import { ReminderProvider } from "./features/reminders/context/ReminderContext.j
 import Folders from "./pages/folders/Folders.jsx";
 import FolderDetails from "./pages/folders/FolderDetails.jsx";
 import { FolderProvider } from "./features/folders/context/FolderContext.jsx";
+import { ToastProvider } from "./components/ui/Toast.jsx";
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ReminderProvider>
-        <FolderProvider>
-          <Routes>
-            <Route element={<RequireGuest />}>
-              <Route path="/login" element={<Login />} />
-            </Route>
-            <Route
-              path="/"
-              element={<RequireAuth />}
-            >
-              <Route element={<AppLayout />}>
-                <Route index element={<Navigate to="/login" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="users" element={<Users />} />
-                <Route path="subscriptions" element={<Subscriptions />} />
-                <Route path="notifications" element={<Notifications />} />
-                <Route path="folders" element={<Folders />} />
-                <Route path="folders/:folderId" element={<FolderDetails />} />
-                <Route path="reminders" element={<Reminders />} />
-                <Route path="reminders/:folderId" element={<ReminderFolderDetails />} />
-                <Route path="activity-logs" element={<ActivityLogs />} />
-                <Route path="settings" element={<Settings />} />
-                <Route path="profile" element={<Profile />} />
+    <ToastProvider>
+      <AuthProvider>
+        <ReminderProvider>
+          <FolderProvider>
+            <Routes>
+              <Route element={<RequireGuest />}>
+                <Route path="/login" element={<Login />} />
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </FolderProvider>
-      </ReminderProvider>
-    </AuthProvider>
+              <Route
+                path="/"
+                element={<RequireAuth />}
+              >
+                <Route element={<AppLayout />}>
+                  <Route index element={<Navigate to="/login" replace />} />
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="users" element={<Users />} />
+                  <Route path="subscriptions" element={<Subscriptions />} />
+                  <Route path="notifications" element={<Notifications />} />
+                  <Route path="folders" element={<Folders />} />
+                  <Route path="folders/:folderId" element={<FolderDetails />} />
+                  <Route path="reminders" element={<Reminders />} />
+                  <Route path="reminders/:folderId" element={<ReminderFolderDetails />} />
+                  <Route path="activity-logs" element={<ActivityLogs />} />
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="profile" element={<Profile />} />
+                </Route>
+              </Route>
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </FolderProvider>
+        </ReminderProvider>
+      </AuthProvider>
+    </ToastProvider>
   );
 }

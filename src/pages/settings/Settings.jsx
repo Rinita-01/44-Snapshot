@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { ChangepasswordApi } from "@/api";
+import { getApiErrorMessage } from "@/api/helpers";
+import { useToast } from "@/components/ui/Toast";
 
 const initialSettings = {
   appName: "44 Snapshot",
@@ -8,6 +11,7 @@ const initialSettings = {
 };
 
 export default function Settings() {
+  const { pushToast } = useToast();
   const [form, setForm] = useState(initialSettings);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
@@ -20,13 +24,14 @@ export default function Settings() {
   });
   const [status, setStatus] = useState("");
   const [passwordStatus, setPasswordStatus] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const handleSubmit = () => {
     setStatus("Settings saved (demo). ");
     setTimeout(() => setStatus(""), 2000);
   };
 
-  const handlePasswordUpdate = () => {
+  const handlePasswordUpdate = async () => {
     if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
       setPasswordStatus("Please fill all password fields.");
       return;
@@ -35,9 +40,31 @@ export default function Settings() {
       setPasswordStatus("New passwords do not match.");
       return;
     }
-    setPasswordStatus("Password updated (demo). ");
-    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    setTimeout(() => setPasswordStatus(""), 2000);
+
+    setIsUpdatingPassword(true);
+    setPasswordStatus("");
+
+    try {
+      const payload = {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+        confirmPassword: passwordForm.confirmPassword
+      };
+
+      const response = await ChangepasswordApi.changePassword(payload);
+      const successMessage = response?.message || response?.data?.message || "Password updated successfully.";
+
+      setPasswordStatus(successMessage);
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      pushToast(successMessage, "success");
+      setTimeout(() => setPasswordStatus(""), 2000);
+    } catch (error) {
+      const message = getApiErrorMessage(error, "Failed to update password.");
+      setPasswordStatus(message);
+      pushToast(message, "error");
+    } finally {
+      setIsUpdatingPassword(false);
+    }
   };
 
   const togglePreference = (key) => {
@@ -135,13 +162,24 @@ export default function Settings() {
             </label>
           </div>
           {passwordStatus ? (
-            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+            <div
+              className={`mt-4 rounded-xl px-3 py-2 text-xs ${
+                passwordStatus.toLowerCase().includes("success") || passwordStatus.toLowerCase().includes("updated")
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border border-rose-200 bg-rose-50 text-rose-700"
+              }`}
+            >
               {passwordStatus}
             </div>
           ) : null}
           <div className="mt-6 flex justify-end">
-            <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700" type="button" onClick={handlePasswordUpdate}>
-              Update Password
+            <button
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              type="button"
+              onClick={handlePasswordUpdate}
+              disabled={isUpdatingPassword}
+            >
+              {isUpdatingPassword ? "Updating..." : "Update Password"}
             </button>
           </div>
         </section>

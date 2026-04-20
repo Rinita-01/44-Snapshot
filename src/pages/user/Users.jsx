@@ -1,11 +1,19 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
-import { users as seedUsers } from "../../data/dummyData.js";
+import { userApi } from "../../api";
+import { getApiErrorMessage } from "../../api/helpers.js";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
+
+const getStatusClasses = (value) =>
+  value === "Active"
+    ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+    : value === "Trial"
+      ? "bg-amber-50 text-amber-700 ring-1 ring-amber-200"
+      : "bg-rose-50 text-rose-700 ring-1 ring-rose-200";
 
 const emptyForm = {
   name: "",
@@ -17,15 +25,84 @@ const emptyForm = {
   price: "$0"
 };
 
+const getUsersFromResponse = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.users)) return payload.users;
+  if (Array.isArray(payload?.data?.users)) return payload.data.users;
+  if (Array.isArray(payload?.results)) return payload.results;
+
+  return [];
+};
+
+const getUpdatedUserFromResponse = (payload) => {
+  if (!payload || typeof payload !== "object") return null;
+  if (payload.user && typeof payload.user === "object") return payload.user;
+  if (payload.data?.user && typeof payload.data.user === "object") return payload.data.user;
+  if (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data)) return payload.data;
+  if (payload.result && typeof payload.result === "object") return payload.result;
+
+  return null;
+};
+
+const normalizeUser = (user, index = 0) => ({
+  ...user,
+  id: user?.id || user?._id || `user-${index}`,
+  name: user?.name || user?.fullName || user?.username || "Unknown",
+  email: user?.email || "N/A",
+  joinDate: user?.joinDate || user?.createdAt || user?.registeredAt || "N/A",
+  status: user?.status || user?.subscriptionStatus || user?.planStatus || "Active",
+  storageUsed: user?.storageUsed || user?.storage || user?.storageUsage || "0 GB",
+  lastLogin: user?.lastLogin || user?.lastSeen || user?.updatedAt || "N/A",
+  price: user?.price || user?.amount || user?.planPrice || "$0"
+});
+
 export default function Users() {
-  const [usersData, setUsersData] = useState(seedUsers);
+  const [usersData, setUsersData] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [page, setPage] = useState(1);
-  const [loading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState("");
+  const [modalError, setModalError] = useState("");
   const [modal, setModal] = useState({ open: false, type: "", user: null });
   const [form, setForm] = useState(emptyForm);
   const pageSize = 6;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUsers = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await userApi.getUsers();
+        const nextUsers = getUsersFromResponse(response).map(normalizeUser);
+
+        if (isMounted) {
+          setUsersData(nextUsers);
+        }
+      } catch (fetchError) {
+        if (isMounted) {
+          setError(getApiErrorMessage(fetchError, "Failed to load users."));
+          setUsersData([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchUsers();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     return usersData.filter((user) => {
@@ -48,12 +125,7 @@ export default function Users() {
       label: "Subscription Status",
       render: (row) => (
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === "Active"
-            ? "bg-emerald-50 text-emerald-700"
-            : row.status === "Trial"
-              ? "bg-amber-50 text-amber-700"
-              : "bg-rose-50 text-rose-700"
-            }`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(row.status)}`}
         >
           {row.status}
         </span>
@@ -65,6 +137,7 @@ export default function Users() {
 
   const openAdd = () => {
     setForm(emptyForm);
+    setModalError("");
     setModal({ open: true, type: "add", user: null });
   };
 
@@ -78,6 +151,7 @@ export default function Users() {
       lastLogin: user.lastLogin,
       price: user.price
     });
+    setModalError("");
     setModal({ open: true, type: "edit", user });
   };
 
@@ -91,21 +165,28 @@ export default function Users() {
       lastLogin: user.lastLogin,
       price: user.price
     });
+    setModalError("");
     setModal({ open: true, type: "view", user });
   };
 
   const openSuspend = (user) => {
+    setModalError("");
     setModal({ open: true, type: "suspend", user });
   };
 
   const openDelete = (user) => {
+    setModalError("");
     setModal({ open: true, type: "delete", user });
   };
 
-  const closeModal = () => setModal({ open: false, type: "", user: null });
+  const closeModal = () => {
+    setModalError("");
+    setModal({ open: false, type: "", user: null });
+  };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.email) return;
+
     if (modal.type === "add") {
       const nextId = `u${usersData.length + 1}`;
       setUsersData((prev) => [
@@ -115,13 +196,46 @@ export default function Users() {
         },
         ...prev
       ]);
+      closeModal();
+      return;
     }
+
     if (modal.type === "edit" && modal.user) {
-      setUsersData((prev) =>
-        prev.map((item) => (item.id === modal.user.id ? { ...item, ...form } : item))
-      );
+      setIsSaving(true);
+      setModalError("");
+
+      try {
+        const payload = {
+      
+          userId: modal.user.id,
+          _id: modal.user._id,
+          name: form.name,
+          email: form.email,
+          joinDate: form.joinDate,
+          status: form.status,
+          storageUsed: form.storageUsed,
+          lastLogin: form.lastLogin,
+          price: form.price
+        };
+
+        const response = await userApi.updateUser(payload,modal.user.id,);
+        const updatedUser = getUpdatedUserFromResponse(response);
+        const nextUser = normalizeUser(
+          updatedUser ? { ...modal.user, ...updatedUser } : { ...modal.user, ...form }
+        );
+
+        setUsersData((prev) =>
+          prev.map((item) => (item.id === modal.user.id ? nextUser : item))
+        );
+        closeModal();
+      } catch (saveError) {
+        setModalError(getApiErrorMessage(saveError, "Failed to update user."));
+      } finally {
+        setIsSaving(false);
+      }
+
+      return;
     }
-    closeModal();
   };
 
   const handleSuspend = () => {
@@ -132,13 +246,44 @@ export default function Users() {
     closeModal();
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!modal.user) return;
-    setUsersData((prev) => prev.filter((item) => item.id !== modal.user.id));
-    closeModal();
+
+    const userId = modal.user._id || modal.user.id;
+    if (!userId) {
+      setModalError("Unable to determine which user to delete.");
+      return;
+    }
+
+    setIsDeleting(true);
+    setModalError("");
+
+    try {
+      await userApi.deleteUser({}, userId);
+
+      setUsersData((prev) => {
+        const nextUsers = prev.filter((item) => item.id !== modal.user.id);
+        const nextTotalPages = Math.max(1, Math.ceil(nextUsers.length / pageSize));
+
+        setPage((currentPage) => Math.min(currentPage, nextTotalPages));
+        return nextUsers;
+      });
+
+      closeModal();
+    } catch (deleteError) {
+      setModalError(getApiErrorMessage(deleteError, "Failed to delete user."));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const readOnly = modal.type === "view";
+  const profileInitials = form.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("") || "U";
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -146,6 +291,12 @@ export default function Users() {
         <div className="text-2xl font-semibold">User Management</div>
         <p className="mt-2 text-sm text-slate-500">Manage accounts, subscriptions, and storage consumption.</p>
       </div>
+
+      {error ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          {error}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -186,6 +337,7 @@ export default function Users() {
         <DataTable
           columns={columns}
           data={paginated}
+          emptyMessage="No users found."
           actions={(row) => (
             <div className="flex items-center gap-2">
               <button
@@ -206,7 +358,7 @@ export default function Users() {
                 <PencilSquareIcon className="h-4 w-4" />
                 <span className="sr-only">Edit</span>
               </button>
-              <button
+              {/* <button
                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
                 onClick={() => openSuspend(row)}
                 type="button"
@@ -214,7 +366,7 @@ export default function Users() {
               >
                 <PauseCircleIcon className="h-4 w-4" />
                 <span className="sr-only">Suspend</span>
-              </button>
+              </button> */}
               <button
                 className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
                 onClick={() => openDelete(row)}
@@ -290,8 +442,13 @@ export default function Users() {
               <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
                 Cancel
               </button>
-              <button className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white" onClick={handleDelete} type="button">
-                Delete User
+              <button
+                className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isDeleting}
+                onClick={handleDelete}
+                type="button"
+              >
+                {isDeleting ? "Deleting..." : "Delete User"}
               </button>
             </>
           ) : modal.type === "view" ? (
@@ -303,14 +460,25 @@ export default function Users() {
               <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
                 Cancel
               </button>
-              <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={handleSave} type="button">
-                Save
+              <button
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isSaving}
+                onClick={handleSave}
+                type="button"
+              >
+                {isSaving ? "Saving..." : "Save"}
               </button>
             </>
           )
         }
       >
-        {(modal.type === "add" || modal.type === "edit" || modal.type === "view") && (
+        {modalError ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {modalError}
+          </div>
+        ) : null}
+
+        {(modal.type === "add" || modal.type === "edit") && (
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm text-slate-600">
               User Name
@@ -381,6 +549,42 @@ export default function Users() {
             </label>
           </div>
         )}
+
+        {modal.type === "view" && modal.user ? (
+          <div className="space-y-5">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="grid h-14 w-14 place-items-center rounded-xl border border-slate-200 bg-white text-base font-semibold text-slate-700">
+                {profileInitials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-lg font-semibold text-slate-900">{form.name}</div>
+                <div className="truncate text-sm text-slate-500">{form.email}</div>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(form.status)}`}>
+                {form.status}
+              </span>
+            </div>
+
+            <div className="overflow-hidden rounded-2xl border border-slate-200">
+              {[
+                { label: "Email Address", value: form.email },
+                { label: "Join Date", value: form.joinDate },
+                { label: "Price", value: form.price },
+                { label: "Storage Used", value: form.storageUsed },
+                { label: "Last Login", value: form.lastLogin }
+              ].map((item, index, array) => (
+                <div
+                  key={item.label}
+                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${index !== array.length - 1 ? "border-b border-slate-200" : ""
+                    }`}
+                >
+                  <div className="text-sm font-medium text-slate-500">{item.label}</div>
+                  <div className="text-sm text-slate-900">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {modal.type === "suspend" && modal.user ? (
           <div className="text-sm text-slate-600">

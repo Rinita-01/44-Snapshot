@@ -8,7 +8,7 @@ import { useReminderStore } from "../../features/reminders/context/ReminderConte
 export default function ReminderFolderDetails() {
   const { folderId } = useParams();
   const [entryModalOpen, setEntryModalOpen] = useState(false);
-  const { getFolderById, templates, addEntries, snoozeEntry, snoozeOptions } = useReminderStore();
+  const { getFolderById, templates, addEntries, snoozeEntry, snoozeOptions, isAddingEntries } = useReminderStore();
 
   const folder = getFolderById(folderId);
 
@@ -66,11 +66,12 @@ export default function ReminderFolderDetails() {
       <DynamicEntryForm
         folderName={folder.name}
         onClose={() => setEntryModalOpen(false)}
-        onSubmit={(entries) => {
-          addEntries(folder.id, entries);
+        onSubmit={async (entries) => {
+          await addEntries(folder.id, entries);
           setEntryModalOpen(false);
         }}
         open={entryModalOpen}
+        isSubmitting={isAddingEntries}
         template={template}
       />
     </>
