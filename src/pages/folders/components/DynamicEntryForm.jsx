@@ -69,6 +69,19 @@ function FieldInput({ field, value, onChange, inputId }) {
     );
   }
 
+  if (field.type === "datetime") {
+    return (
+      <input
+        className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400"
+        id={inputId}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={field.placeholder}
+        type="datetime-local"
+        value={value}
+      />
+    );
+  }
+
   return (
     <input
       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400"

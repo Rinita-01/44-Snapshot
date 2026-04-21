@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 
-const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "phone", "number", "file", "image", "dropdown", "select"];
+const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "datetime", "phone", "number", "file", "image", "dropdown", "select"];
 
 function buildKeyFromLabel(label) {
   return label

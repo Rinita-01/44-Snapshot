@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Modal from "../../../components/ui/Modal.jsx";
 
-const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "phone", "number", "file", "image", "dropdown", "select"];
+const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "datetime", "phone", "number", "file", "image", "dropdown", "select"];
 
 function buildKeyFromLabel(label) {
   return label
