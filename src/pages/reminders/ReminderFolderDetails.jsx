@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { reminderApi } from "../../api/index.js";
 import { getApiErrorMessage } from "../../api/helpers.js";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import TemplateEditor from "../folders/components/TemplateEditor.jsx";
 
 const STORAGE_KEY = "snapshot-reminders";
@@ -114,11 +115,9 @@ function mergeReminderWithStoredData(reminder, storedFolders) {
 
 export default function ReminderFolderDetails() {
   const { folderId } = useParams();
-  const [folder, setFolder] = useState(() => {
-    const storedFolders = readFolders();
-    return storedFolders.find((item) => String(item.id || item._id) === String(folderId)) || null;
-  });
+  const [folder, setFolder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState("");
   const [isUpdatingReminder, setIsUpdatingReminder] = useState(false);
 
@@ -151,6 +150,7 @@ export default function ReminderFolderDetails() {
       } finally {
         if (isMounted) {
           setLoading(false);
+          setInitialLoad(false);
         }
       }
     };
@@ -175,12 +175,8 @@ export default function ReminderFolderDetails() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextFolders));
   }, [folder]);
 
-  if (loading && !folder) {
-    return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-        <div className="text-lg font-semibold text-slate-800">Loading reminder folder...</div>
-      </div>
-    );
+  if (initialLoad || (loading && !folder)) {
+    return <PageLoader title="Loading Reminder" message="Opening reminder details..." />;
   }
 
   if (!folder) {

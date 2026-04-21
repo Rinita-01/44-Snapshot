@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import Modal from "../../../components/ui/Modal.jsx";
 
-const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "phone", "number", "file", "image", "dropdown"];
+const FIELD_TYPE_OPTIONS = ["text", "email", "date", "time", "phone", "number", "file", "image", "dropdown", "select"];
 const DEFAULT_COLOR = "#4CAF50";
 
 function buildKeyFromLabel(label) {
@@ -43,7 +43,7 @@ function normalizeTemplateFields(fields) {
         normalizedField.required = true;
       }
 
-      if (field.type === "dropdown") {
+      if (field.type === "dropdown" || field.type === "select") {
         normalizedField.options = field.optionsText
           .split(",")
           .map((option) => option.trim())
@@ -52,7 +52,7 @@ function normalizeTemplateFields(fields) {
 
       return normalizedField;
     })
-    .filter((field) => field.label && field.key && (field.type !== "dropdown" || field.options?.length));
+    .filter((field) => field.label && field.key && (!["dropdown", "select"].includes(field.type) || field.options?.length));
 }
 
 export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Create Folder", isSubmitting = false }) {
@@ -74,7 +74,7 @@ export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Cre
           ? {
             ...field,
             [key]: value,
-            ...(key === "type" && value !== "dropdown" ? { optionsText: "" } : {}),
+            ...(key === "type" && value !== "dropdown" && value !== "select" ? { optionsText: "" } : {}),
             ...(key === "label" ? { key: buildKeyFromLabel(value) } : {})
           }
           : field
@@ -236,12 +236,11 @@ export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Cre
                     <span className="text-sm font-semibold text-slate-700">Key</span>
                     <input
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400"
-                      disabled={true||isSubmitting}
+                      disabled={isSubmitting}
                       onChange={(event) => updateField(fieldIndex, "key", event.target.value)}
                       placeholder="phone_number"
                       type="text"
                       value={field.key}
-                      
                     />
                   </label>
 
@@ -272,7 +271,7 @@ export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Cre
                     <span className="text-sm font-semibold text-slate-700">Required field</span>
                   </label>
 
-                  {field.type === "dropdown" ? (
+                  {field.type === "dropdown" || field.type === "select" ? (
                     <label className="block space-y-2 md:col-span-2">
                       <span className="text-sm font-semibold text-slate-700">Dropdown Options</span>
                       <input

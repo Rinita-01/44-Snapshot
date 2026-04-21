@@ -3,6 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { folderApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import TemplateEditor from "./components/TemplateEditor.jsx";
 import { getFolderMutedTextColor, getFolderTextColor, normalizeFolderColor } from "./utils/folderColors.js";
 
@@ -105,11 +106,9 @@ function mergeFolderWithStoredData(folder, storedFolders) {
 
 export default function FolderDetails() {
   const { folderId } = useParams();
-  const [folder, setFolder] = useState(() => {
-    const storedFolders = readFolders();
-    return storedFolders.find((item) => String(item.id || item._id || item.folderId) === String(folderId)) || null;
-  });
+  const [folder, setFolder] = useState(null);
   const [isLoadingFolders, setIsLoadingFolders] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [folderError, setFolderError] = useState("");
   const [isUpdatingFolder, setIsUpdatingFolder] = useState(false);
 
@@ -142,6 +141,7 @@ export default function FolderDetails() {
       } finally {
         if (isMounted) {
           setIsLoadingFolders(false);
+          setInitialLoad(false);
         }
       }
     };
@@ -166,12 +166,8 @@ export default function FolderDetails() {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextFolders));
   }, [folder]);
 
-  if (isLoadingFolders && !folder) {
-    return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-        <div className="text-lg font-semibold text-slate-800">Loading folder...</div>
-      </div>
-    );
+  if (initialLoad || (isLoadingFolders && !folder)) {
+    return <PageLoader title="Loading Folder" message="Opening folder details..." />;
   }
 
   if (!folder) {
@@ -232,21 +228,12 @@ export default function FolderDetails() {
           </div>
         ) : null}
 
-        {template.fields.length ? (
-          <TemplateEditor
-            folderName={folder.name}
-            fields={template.fields}
-            isSubmitting={isUpdatingFolder}
-            onSubmit={updateTemplate}
-          />
-        ) : (
-          <TemplateEditor
-            folderName={folder.name}
-            fields={[]}
-            isSubmitting={isUpdatingFolder}
-            onSubmit={updateTemplate}
-          />
-        )}
+        <TemplateEditor
+          folderName={folder.name}
+          fields={template.fields}
+          isSubmitting={isUpdatingFolder}
+          onSubmit={updateTemplate}
+        />
       </div>
     </>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ChangepasswordApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
 import { useToast } from "@/components/ui/Toast";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 
 const initialSettings = {
   appName: "44 Snapshot",
@@ -70,6 +71,10 @@ export default function Settings() {
   const togglePreference = (key) => {
     setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  if (isUpdatingPassword) {
+    return <PageLoader title="Updating Password" message="Please wait while we update your password..." />;
+  }
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -163,23 +168,21 @@ export default function Settings() {
           </div>
           {passwordStatus ? (
             <div
-              className={`mt-4 rounded-xl px-3 py-2 text-xs ${
-                passwordStatus.toLowerCase().includes("success") || passwordStatus.toLowerCase().includes("updated")
-                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-                  : "border border-rose-200 bg-rose-50 text-rose-700"
-              }`}
+              className={`mt-4 rounded-xl px-3 py-2 text-xs ${passwordStatus.toLowerCase().includes("success") || passwordStatus.toLowerCase().includes("updated")
+                ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                : "border border-rose-200 bg-rose-50 text-rose-700"
+                }`}
             >
               {passwordStatus}
             </div>
           ) : null}
           <div className="mt-6 flex justify-end">
             <button
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
               type="button"
               onClick={handlePasswordUpdate}
-              disabled={isUpdatingPassword}
             >
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
+              Update Password
             </button>
           </div>
         </section>

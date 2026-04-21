@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
-import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import { userApi } from "../../api";
 import { getApiErrorMessage } from "../../api/helpers.js";
 
@@ -206,7 +206,7 @@ export default function Users() {
 
       try {
         const payload = {
-      
+
           userId: modal.user.id,
           _id: modal.user._id,
           name: form.name,
@@ -218,7 +218,7 @@ export default function Users() {
           price: form.price
         };
 
-        const response = await userApi.updateUser(payload,modal.user.id,);
+        const response = await userApi.updateUser(payload, modal.user.id,);
         const updatedUser = getUpdatedUserFromResponse(response);
         const nextUser = normalizeUser(
           updatedUser ? { ...modal.user, ...updatedUser } : { ...modal.user, ...form }
@@ -332,7 +332,7 @@ export default function Users() {
       </div>
 
       {loading ? (
-        <SkeletonTable />
+        <PageLoader title="Loading Users" message="Fetching user data from the server..." />
       ) : (
         <DataTable
           columns={columns}

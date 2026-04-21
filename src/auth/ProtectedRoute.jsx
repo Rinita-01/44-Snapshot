@@ -1,17 +1,14 @@
-﻿import React from "react";
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "./AuthProvider";
+import { PageLoader } from "../components/ui/Skeletons.jsx";
 
 export function ProtectedRoute({ children, allowedRoles }) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-sm text-slate-500">
-        Checking session...
-      </div>
-    );
+    return <PageLoader title="Checking Session" message="Verifying your account and workspace access..." />;
   }
 
   if (!isAuthenticated) {

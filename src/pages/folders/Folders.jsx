@@ -6,6 +6,7 @@ import { getApiErrorMessage } from "@/api/helpers";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
 import { normalizeFolderColor } from "./utils/folderColors.js";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 
 const STORAGE_KEY = "snapshot-folders";
 
@@ -229,10 +230,7 @@ export default function Folders() {
         ) : null}
 
         {isLoadingFolders ? (
-          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-            <div className="text-lg font-semibold text-slate-800">Loading folders...</div>
-            <div className="mt-2 text-sm text-slate-500">Loading your folder data from the API.</div>
-          </div>
+          <PageLoader title="Loading Folders" message="Fetching your folder data from the API..." />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (

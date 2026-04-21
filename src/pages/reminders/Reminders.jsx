@@ -5,7 +5,7 @@ import { reminderApi } from "../../api/index.js";
 import { getApiErrorMessage } from "../../api/helpers.js";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
-import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 
 const STORAGE_KEY = "snapshot-reminders";
 
@@ -250,7 +250,7 @@ export default function Reminders() {
         ) : null}
 
         {loading ? (
-          <SkeletonTable />
+          <PageLoader title="Loading Reminders" message="Fetching reminder folders from the server..." />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (
