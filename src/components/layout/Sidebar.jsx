@@ -11,7 +11,7 @@ import {
   Cog6ToothIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
-import { useAuth } from "../../auth/auth-context.js";
+import { useAuth } from "@/auth/AuthProvider";
 import Modal from "../ui/Modal.jsx";
 
 const navItems = [
@@ -32,10 +32,10 @@ export default function Sidebar({ open, onClose }) {
   const displayRole = user?.role || "Signed-in user";
   const initials = displayName
     .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
   const linkClass = ({ isActive }) =>
     [
       "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",

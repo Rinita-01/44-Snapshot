@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useState } from "react";
-import { useAuth } from "../../auth/auth-context";
+import { useAuth } from "@/auth/AuthProvider";
 
 export default function Profile() {
   const { user, refreshProfile } = useAuth();
