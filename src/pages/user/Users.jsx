@@ -1,5 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { EyeIcon, PencilSquareIcon, PauseCircleIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  EyeIcon,
+  PencilSquareIcon,
+  PauseCircleIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { PageLoader } from "../../components/ui/Skeletons.jsx";
@@ -18,11 +23,15 @@ const getStatusClasses = (value) =>
 const emptyForm = {
   name: "",
   email: "",
+  phone: "",
+  businessName: "",
+  role: "user",
   joinDate: "2026-03-12",
   status: "Active",
   storageUsed: "0 GB",
   lastLogin: "2026-03-12",
-  price: "$0"
+  price: "$0",
+  dateOfBirth: "",
 };
 
 const getUsersFromResponse = (payload) => {
@@ -38,24 +47,49 @@ const getUsersFromResponse = (payload) => {
 const getUpdatedUserFromResponse = (payload) => {
   if (!payload || typeof payload !== "object") return null;
   if (payload.user && typeof payload.user === "object") return payload.user;
-  if (payload.data?.user && typeof payload.data.user === "object") return payload.data.user;
-  if (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data)) return payload.data;
-  if (payload.result && typeof payload.result === "object") return payload.result;
+  if (payload.data?.user && typeof payload.data.user === "object")
+    return payload.data.user;
+  if (
+    payload.data &&
+    typeof payload.data === "object" &&
+    !Array.isArray(payload.data)
+  )
+    return payload.data;
+  if (payload.result && typeof payload.result === "object")
+    return payload.result;
 
   return null;
 };
 
-const normalizeUser = (user, index = 0) => ({
-  ...user,
-  id: user?.id || user?._id || `user-${index}`,
-  name: user?.name || user?.fullName || user?.username || "Unknown",
-  email: user?.email || "N/A",
-  joinDate: user?.joinDate || user?.createdAt || user?.registeredAt || "N/A",
-  status: user?.status || user?.subscriptionStatus || user?.planStatus || "Active",
-  storageUsed: user?.storageUsed || user?.storage || user?.storageUsage || "0 GB",
-  lastLogin: user?.lastLogin || user?.lastSeen || user?.updatedAt || "N/A",
-  price: user?.price || user?.amount || user?.planPrice || "$0"
-});
+const normalizeUser = (user, index = 0) => {
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return dateString;
+    }
+  };
+
+  return {
+    ...user,
+    id: user?.id || user?._id || `user-${index}`,
+    name: user?.name || user?.fullName || user?.username || "Unknown",
+    email: user?.email || "N/A",
+    joinDate: formatDate(user?.createdAt || user?.joinDate || user?.registeredAt),
+    status:
+      user?.status || user?.subscriptionStatus || user?.planStatus || "Active",
+    storageUsed:
+      user?.storageUsed || user?.storage || user?.storageUsage || "0 GB",
+    lastLogin: formatDate(user?.updatedAt || user?.lastLogin || user?.lastSeen),
+    price: user?.price || user?.amount || user?.planPrice || "$0",
+    phone: user?.phone || "N/A",
+    businessName: user?.business_name || "N/A",
+    role: user?.role || "user",
+    dateOfBirth: formatDate(user?.date_of_birth),
+    providers: user?.provider || user?.providers || [],
+  };
+};
 
 export default function Users() {
   const [usersData, setUsersData] = useState([]);
@@ -106,7 +140,9 @@ export default function Users() {
 
   const filtered = useMemo(() => {
     return usersData.filter((user) => {
-      const matchesSearch = user.name.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch =
+        user.name.toLowerCase().includes(search.toLowerCase()) ||
+        user.email.toLowerCase().includes(search.toLowerCase());
       const matchesStatus = status === "All" || user.status === status;
       return matchesSearch && matchesStatus;
     });
@@ -118,6 +154,9 @@ export default function Users() {
   const columns = [
     { key: "name", label: "User Name" },
     { key: "email", label: "Email" },
+    { key: "phone", label: "Phone" },
+    { key: "businessName", label: "Business" },
+    { key: "role", label: "Role" },
     { key: "joinDate", label: "Join Date" },
     { key: "price", label: "Price" },
     {
@@ -129,10 +168,10 @@ export default function Users() {
         >
           {row.status}
         </span>
-      )
+      ),
     },
     { key: "storageUsed", label: "Storage Used" },
-    { key: "lastLogin", label: "Last Login" }
+    { key: "lastLogin", label: "Last Login" },
   ];
 
   const openAdd = () => {
@@ -145,11 +184,15 @@ export default function Users() {
     setForm({
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      businessName: user.businessName,
+      role: user.role,
       joinDate: user.joinDate,
       status: user.status,
       storageUsed: user.storageUsed,
       lastLogin: user.lastLogin,
-      price: user.price
+      price: user.price,
+      dateOfBirth: user.dateOfBirth,
     });
     setModalError("");
     setModal({ open: true, type: "edit", user });
@@ -159,11 +202,15 @@ export default function Users() {
     setForm({
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      businessName: user.businessName,
+      role: user.role,
       joinDate: user.joinDate,
       status: user.status,
       storageUsed: user.storageUsed,
       lastLogin: user.lastLogin,
-      price: user.price
+      price: user.price,
+      dateOfBirth: user.dateOfBirth,
     });
     setModalError("");
     setModal({ open: true, type: "view", user });
@@ -192,9 +239,9 @@ export default function Users() {
       setUsersData((prev) => [
         {
           id: nextId,
-          ...form
+          ...form,
         },
-        ...prev
+        ...prev,
       ]);
       closeModal();
       return;
@@ -206,7 +253,6 @@ export default function Users() {
 
       try {
         const payload = {
-
           userId: modal.user.id,
           _id: modal.user._id,
           name: form.name,
@@ -215,17 +261,19 @@ export default function Users() {
           status: form.status,
           storageUsed: form.storageUsed,
           lastLogin: form.lastLogin,
-          price: form.price
+          price: form.price,
         };
 
-        const response = await userApi.updateUser(payload, modal.user.id,);
+        const response = await userApi.updateUser(payload, modal.user.id);
         const updatedUser = getUpdatedUserFromResponse(response);
         const nextUser = normalizeUser(
-          updatedUser ? { ...modal.user, ...updatedUser } : { ...modal.user, ...form }
+          updatedUser
+            ? { ...modal.user, ...updatedUser }
+            : { ...modal.user, ...form },
         );
 
         setUsersData((prev) =>
-          prev.map((item) => (item.id === modal.user.id ? nextUser : item))
+          prev.map((item) => (item.id === modal.user.id ? nextUser : item)),
         );
         closeModal();
       } catch (saveError) {
@@ -241,7 +289,9 @@ export default function Users() {
   const handleSuspend = () => {
     if (!modal.user) return;
     setUsersData((prev) =>
-      prev.map((item) => (item.id === modal.user.id ? { ...item, status: "Suspended" } : item))
+      prev.map((item) =>
+        item.id === modal.user.id ? { ...item, status: "Suspended" } : item,
+      ),
     );
     closeModal();
   };
@@ -263,7 +313,10 @@ export default function Users() {
 
       setUsersData((prev) => {
         const nextUsers = prev.filter((item) => item.id !== modal.user.id);
-        const nextTotalPages = Math.max(1, Math.ceil(nextUsers.length / pageSize));
+        const nextTotalPages = Math.max(
+          1,
+          Math.ceil(nextUsers.length / pageSize),
+        );
 
         setPage((currentPage) => Math.min(currentPage, nextTotalPages));
         return nextUsers;
@@ -278,18 +331,21 @@ export default function Users() {
   };
 
   const readOnly = modal.type === "view";
-  const profileInitials = form.name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("") || "U";
+  const profileInitials =
+    form.name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("") || "U";
 
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
         <div className="text-2xl font-semibold">User Management</div>
-        <p className="mt-2 text-sm text-slate-500">Manage accounts, subscriptions, and storage consumption.</p>
+        <p className="mt-2 text-sm text-slate-500">
+          Manage accounts, subscriptions, and storage consumption.
+        </p>
       </div>
 
       {error ? (
@@ -322,17 +378,20 @@ export default function Users() {
             ))}
           </select>
         </div>
-        <button
+        {/* <button
           className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm"
           onClick={openAdd}
           type="button"
         >
           Add User
-        </button>
+        </button> */}
       </div>
 
       {loading ? (
-        <PageLoader title="Loading Users" message="Fetching user data from the server..." />
+        <PageLoader
+          title="Loading Users"
+          message="Fetching user data from the server..."
+        />
       ) : (
         <DataTable
           columns={columns}
@@ -396,7 +455,9 @@ export default function Users() {
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
               key={idx}
-              className={`h-8 w-8 rounded-lg border ${page === idx + 1 ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200"
+              className={`h-8 w-8 rounded-lg border ${page === idx + 1
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-200"
                 }`}
               onClick={() => setPage(idx + 1)}
             >
@@ -430,16 +491,28 @@ export default function Users() {
         actions={
           modal.type === "suspend" ? (
             <>
-              <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold"
+                onClick={closeModal}
+                type="button"
+              >
                 Cancel
               </button>
-              <button className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white" onClick={handleSuspend} type="button">
+              <button
+                className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white"
+                onClick={handleSuspend}
+                type="button"
+              >
                 Confirm Suspend
               </button>
             </>
           ) : modal.type === "delete" ? (
             <>
-              <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold"
+                onClick={closeModal}
+                type="button"
+              >
                 Cancel
               </button>
               <button
@@ -452,12 +525,20 @@ export default function Users() {
               </button>
             </>
           ) : modal.type === "view" ? (
-            <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={closeModal} type="button">
+            <button
+              className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              onClick={closeModal}
+              type="button"
+            >
               Close
             </button>
           ) : (
             <>
-              <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold"
+                onClick={closeModal}
+                type="button"
+              >
                 Cancel
               </button>
               <button
@@ -485,7 +566,9 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.name}
-                onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, name: event.target.value }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -494,7 +577,56 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.email}
-                onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, email: event.target.value }))
+                }
+                disabled={readOnly}
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Phone
+              <input
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={form.phone}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, phone: event.target.value }))
+                }
+                disabled={readOnly}
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Business Name
+              <input
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={form.businessName}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, businessName: event.target.value }))
+                }
+                disabled={readOnly}
+              />
+            </label>
+            <label className="text-sm text-slate-600">
+              Role
+              <select
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={form.role}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, role: event.target.value }))
+                }
+                disabled={readOnly}
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <label className="text-sm text-slate-600">
+              Date of Birth
+              <input
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                value={form.dateOfBirth}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, dateOfBirth: event.target.value }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -503,7 +635,9 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.joinDate}
-                onChange={(event) => setForm((prev) => ({ ...prev, joinDate: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, joinDate: event.target.value }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -512,12 +646,16 @@ export default function Users() {
               <select
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.status}
-                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, status: event.target.value }))
+                }
                 disabled={readOnly}
               >
-                {statuses.filter((item) => item !== "All").map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
+                {statuses
+                  .filter((item) => item !== "All")
+                  .map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
               </select>
             </label>
             <label className="text-sm text-slate-600">
@@ -525,7 +663,9 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.price}
-                onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, price: event.target.value }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -534,7 +674,12 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.storageUsed}
-                onChange={(event) => setForm((prev) => ({ ...prev, storageUsed: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    storageUsed: event.target.value,
+                  }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -543,7 +688,12 @@ export default function Users() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.lastLogin}
-                onChange={(event) => setForm((prev) => ({ ...prev, lastLogin: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    lastLogin: event.target.value,
+                  }))
+                }
                 disabled={readOnly}
               />
             </label>
@@ -557,28 +707,43 @@ export default function Users() {
                 {profileInitials}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="text-lg font-semibold text-slate-900">{form.name}</div>
-                <div className="truncate text-sm text-slate-500">{form.email}</div>
+                <div className="text-lg font-semibold text-slate-900">
+                  {form.name}
+                </div>
+                <div className="truncate text-sm text-slate-500">
+                  {form.email}
+                </div>
               </div>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(form.status)}`}>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusClasses(form.status)}`}
+              >
                 {form.status}
               </span>
             </div>
 
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               {[
+
                 { label: "Email Address", value: form.email },
+                { label: "Phone", value: form.phone },
+                { label: "Business Name", value: form.businessName },
+                { label: "Role", value: form.role },
+                { label: "Date of Birth", value: form.dateOfBirth },
                 { label: "Join Date", value: form.joinDate },
                 { label: "Price", value: form.price },
                 { label: "Storage Used", value: form.storageUsed },
-                { label: "Last Login", value: form.lastLogin }
+                { label: "Last Login", value: form.lastLogin },
               ].map((item, index, array) => (
                 <div
                   key={item.label}
-                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${index !== array.length - 1 ? "border-b border-slate-200" : ""
+                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${index !== array.length - 1
+                    ? "border-b border-slate-200"
+                    : ""
                     }`}
                 >
-                  <div className="text-sm font-medium text-slate-500">{item.label}</div>
+                  <div className="text-sm font-medium text-slate-500">
+                    {item.label}
+                  </div>
                   <div className="text-sm text-slate-900">{item.value}</div>
                 </div>
               ))}
@@ -588,13 +753,21 @@ export default function Users() {
 
         {modal.type === "suspend" && modal.user ? (
           <div className="text-sm text-slate-600">
-            Suspend <span className="font-semibold text-slate-900">{modal.user.name}</span> and pause their access?
+            Suspend{" "}
+            <span className="font-semibold text-slate-900">
+              {modal.user.name}
+            </span>{" "}
+            and pause their access?
           </div>
         ) : null}
 
         {modal.type === "delete" && modal.user ? (
           <div className="text-sm text-slate-600">
-            Delete <span className="font-semibold text-slate-900">{modal.user.name}</span> permanently from the admin dashboard?
+            Delete{" "}
+            <span className="font-semibold text-slate-900">
+              {modal.user.name}
+            </span>{" "}
+            permanently from the admin dashboard?
           </div>
         ) : null}
       </Modal>
