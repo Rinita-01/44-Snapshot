@@ -10,7 +10,9 @@ export const authApi = {
 export const folderApi = {
   getFolders: () => axiosInstance.get("/folders/get-folders"),
   createFolder: (payload) => axiosInstance.post("/folders/create-folder", payload),
-  addEntries: (payload) => axiosInstance.post("/folders/create-folder", payload)
+  updateFolder: (payload,id) => axiosInstance.put(`/folders/folder/${id}`, payload),
+  getFolderById:(id) => axiosInstance.get(`/folders/folder/${id}`),
+  deleteFolder:(id) => axiosInstance.delete(`/folders/folder/${id}`)
 };
 
 export const activityApi = {
@@ -27,7 +29,9 @@ export const userApi = {
 export const reminderApi = {
   getReminderData: () => axiosInstance.get("/reminders/get-reminders-template"),
   createReminder: (payload) => axiosInstance.post("/reminders/create-reminder-template", payload),
-  createReminderTemplate: (payload) => axiosInstance.post("/reminders/create-reminder-template", payload)
+  getReminderById: (id) => axiosInstance.get(`/reminders/get-reminder-template/${id}`),
+  updateReminder: (payload, id) => axiosInstance.put(`/reminders/update-reminder-template/${id}`, payload),
+  deleteReminder: (id) => axiosInstance.delete(`/reminders/delete-reminder-template/${id}`)
 };
 
 export const ChangepasswordApi = {
