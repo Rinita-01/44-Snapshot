@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
-import { useAuth } from "../../auth/auth-context";
+import { useAuth } from "@/auth/AuthProvider";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 
 export default function Profile() {
   const { user, refreshProfile } = useAuth();
@@ -26,12 +27,15 @@ export default function Profile() {
     };
   }, [refreshProfile, user]);
 
+  if (loading) {
+    return <PageLoader title="Loading Profile" message="Fetching your profile information..." />;
+  }
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
         <div className="text-2xl font-semibold">Admin Profile</div>
         <p className="mt-2 text-sm text-slate-500">Manage your profile details and access preferences.</p>
-        {loading ? <div className="mt-3 text-xs text-slate-400">Loading profile...</div> : null}
         {error ? <div className="mt-3 text-xs text-rose-500">{error}</div> : null}
       </div>
 

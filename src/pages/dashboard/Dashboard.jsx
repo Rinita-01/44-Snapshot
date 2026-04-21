@@ -17,7 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import StatsCard from "../../components/ui/StatsCard.jsx";
 import ChartCard from "../../components/ui/ChartCard.jsx";
-import { SkeletonCard, SkeletonChart } from "../../components/ui/Skeletons.jsx";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import { stats, userGrowthData, revenueData, recentActivity } from "../../data/dummyData.js";
 
 const iconMap = {
@@ -35,6 +35,10 @@ export default function Dashboard() {
     return () => clearTimeout(timer);
   }, []);
 
+  if (loading) {
+    return <PageLoader title="Loading Dashboard" message="Preparing your overview data..." />;
+  }
+
   return (
     <div className="space-y-8 animate-fade-up">
       <div>
@@ -45,65 +49,55 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {loading
-          ? Array.from({ length: 5 }).map((_, idx) => <SkeletonCard key={idx} />)
-          : stats.map((item) => (
-            <StatsCard
-              key={item.id}
-              title={item.title}
-              value={item.value}
-              delta={item.delta}
-              caption={item.caption}
-              icon={iconMap[item.id]}
-              accent="#e2e8f0"
-            />
-          ))}
+        {stats.map((item) => (
+          <StatsCard
+            key={item.id}
+            title={item.title}
+            value={item.value}
+            delta={item.delta}
+            caption={item.caption}
+            icon={iconMap[item.id]}
+            accent="#e2e8f0"
+          />
+        ))}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {loading ? (
-          <SkeletonChart />
-        ) : (
-          <ChartCard
-            title="User growth"
-            subtitle="Monthly active users across all plans"
-            action="Last 7 months"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={userGrowthData}>
-                <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <Tooltip />
-                <Line type="monotone" dataKey="users" stroke="#0f172a" strokeWidth={3} />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        <ChartCard
+          title="User growth"
+          subtitle="Monthly active users across all plans"
+          action="Last 7 months"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={userGrowthData}>
+              <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+              <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+              <Tooltip />
+              <Line type="monotone" dataKey="users" stroke="#0f172a" strokeWidth={3} />
+            </LineChart>
+          </ResponsiveContainer>
+        </ChartCard>
 
-        {loading ? (
-          <SkeletonChart />
-        ) : (
-          <ChartCard
-            title="Subscription revenue"
-            subtitle="Recurring monthly revenue trend"
-            action="USD"
-          >
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="revenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="revenue" stroke="#2563eb" fill="url(#revenue)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </ChartCard>
-        )}
+        <ChartCard
+          title="Subscription revenue"
+          subtitle="Recurring monthly revenue trend"
+          action="USD"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={revenueData}>
+              <defs>
+                <linearGradient id="revenue" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
+              <YAxis stroke="#94a3b8" tickLine={false} axisLine={false} />
+              <Tooltip />
+              <Area type="monotone" dataKey="revenue" stroke="#2563eb" fill="url(#revenue)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartCard>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

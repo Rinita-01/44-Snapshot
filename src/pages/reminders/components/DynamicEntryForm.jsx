@@ -81,12 +81,15 @@ function FieldInput({ field, value, onChange, inputId }) {
   );
 }
 
-export default function DynamicEntryForm({ open, folderName, template, onClose, onSubmit }) {
+export default function DynamicEntryForm({ open, folderName, template, onClose, onSubmit, isSubmitting = false }) {
   const emptySection = useMemo(() => createEmptySection(template), [template]);
   const [sections, setSections] = useState([{ ...emptySection }]);
+  const [submitError, setSubmitError] = useState("");
 
   const handleClose = () => {
+    if (isSubmitting) return;
     setSections([{ ...emptySection }]);
+    setSubmitError("");
     onClose();
   };
 
@@ -112,9 +115,15 @@ export default function DynamicEntryForm({ open, folderName, template, onClose, 
     setSections((currentSections) => currentSections.filter((_, index) => index !== sectionIndex));
   };
 
-  const handleSubmit = () => {
-    onSubmit(sections);
-    setSections([{ ...emptySection }]);
+  const handleSubmit = async () => {
+    setSubmitError("");
+
+    try {
+      await onSubmit(sections);
+      setSections([{ ...emptySection }]);
+    } catch (error) {
+      setSubmitError(error?.response?.data?.message || error?.message || "Failed to save entries.");
+    }
   };
 
   return (
@@ -126,22 +135,30 @@ export default function DynamicEntryForm({ open, folderName, template, onClose, 
         <>
           <button
             className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600"
+            disabled={isSubmitting}
             onClick={handleClose}
             type="button"
           >
             Cancel
           </button>
           <button
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+            disabled={isSubmitting}
             onClick={handleSubmit}
             type="button"
           >
-            Save Entries
+            {isSubmitting ? "Saving..." : "Save Entries"}
           </button>
         </>
       }
     >
       <div className="space-y-4">
+        {submitError ? (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {submitError}
+          </div>
+        ) : null}
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-sm font-semibold text-slate-800">Template fields</div>
@@ -149,6 +166,7 @@ export default function DynamicEntryForm({ open, folderName, template, onClose, 
           </div>
           <button
             className="grid h-10 w-10 place-items-center rounded-full bg-slate-900 text-xl font-light text-white"
+            disabled={isSubmitting}
             onClick={addSection}
             type="button"
           >
@@ -164,6 +182,7 @@ export default function DynamicEntryForm({ open, folderName, template, onClose, 
                 {sections.length > 1 ? (
                   <button
                     className="text-xs font-semibold text-rose-600"
+                    disabled={isSubmitting}
                     onClick={() => removeSection(sectionIndex)}
                     type="button"
                   >
