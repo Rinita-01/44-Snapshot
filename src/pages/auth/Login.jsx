@@ -5,20 +5,20 @@ import { useAuth } from "@/auth/AuthProvider"
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [password, setPassword] = useState("12345678");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   // const passwordValid = /^(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/.test(password);
 
-  const passwordValid = password.length >= 8
+  const passwordValid = password.length >= 6
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     if (!passwordValid) {
       // setError("Password must be 8+ chars with uppercase, number, and symbol.");
-      setPassword("Password must be 6+ characters")
+      setError("Password must be 6+ characters")
       return;
     }
     const result = await login(email, password);
@@ -76,9 +76,9 @@ export default function Login() {
                 placeholder="**********"
                 required
               />
-              <span className={passwordValid ? "text-xs text-emerald-600" : "text-xs text-amber-600"}>
-                Password must include uppercase, number, symbol.
-              </span>
+              {error&&<span className={passwordValid ? "text-xs text-emerald-600" : "text-xs text-amber-600"}>
+                {error}
+              </span>}
             </label>
             <div className="text-xs text-slate-400">Session is secured with server-side cookies.</div>
 
