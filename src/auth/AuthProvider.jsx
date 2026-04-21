@@ -16,6 +16,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState(null);
 
   const loadProfile = async () => {
@@ -107,10 +108,12 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
       await authApi.logout();
     } finally {
       applyLoggedOutState();
+      setIsLoggingOut(false);
     }
   };
 
@@ -118,6 +121,7 @@ export function AuthProvider({ children }) {
     () => ({
       isAuthenticated,
       isLoading,
+      isLoggingOut,
       user,
       login,
       logout,
@@ -133,7 +137,7 @@ export function AuthProvider({ children }) {
         }
       },
     }),
-    [isAuthenticated, isLoading, user],
+    [isAuthenticated, isLoading, isLoggingOut, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

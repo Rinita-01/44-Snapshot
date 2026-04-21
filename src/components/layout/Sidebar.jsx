@@ -26,7 +26,7 @@ const navItems = [
 ];
 
 export default function Sidebar({ open, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const displayName = user?.name || user?.email || "Admin";
   const displayRole = user?.role || "Signed-in user";
@@ -116,11 +116,19 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <button
-          className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
           onClick={logout}
           type="button"
+          disabled={isLoggingOut}
         >
-          Logout
+          {isLoggingOut ? (
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+              Logging out...
+            </div>
+          ) : (
+            "Logout"
+          )}
         </button>
       </aside>
 

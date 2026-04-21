@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 export default function Navbar({ onMenuClick }) {
   const [open, setOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isLoggingOut } = useAuth();
   const navigate = useNavigate();
   const displayName = user?.name || user?.email || "Admin";
   const initials = displayName
@@ -112,14 +112,22 @@ export default function Navbar({ onMenuClick }) {
                   Profile
                 </button>
                 <button
-                  className="w-full rounded-lg px-3 py-2 text-left text-rose-600 hover:bg-rose-50"
+                  className="w-full rounded-lg px-3 py-2 text-left text-rose-600 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
                   onClick={() => {
                     setOpen(false);
                     logout();
                   }}
                   type="button"
+                  disabled={isLoggingOut}
                 >
-                  Sign out
+                  {isLoggingOut ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-rose-300 border-t-rose-600" />
+                      Signing out...
+                    </div>
+                  ) : (
+                    "Sign out"
+                  )}
                 </button>
               </div>
             ) : null}
