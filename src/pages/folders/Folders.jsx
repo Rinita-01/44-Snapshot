@@ -8,109 +8,12 @@ import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
 import { normalizeFolderColor } from "./utils/folderColors.js";
 import { PageLoader } from "../../components/ui/Skeletons.jsx";
-
-const STORAGE_KEY = "snapshot-folders";
-
-function normalizeTemplateField(field, index = 0) {
-  return {
-    label: field?.label || `Field ${index + 1}`,
-    key: field?.key || `field_${index + 1}`,
-    type: field?.type || "text",
-    required: Boolean(field?.required),
-    options: Array.isArray(field?.options) ? field.options : [],
-    _id: field?._id
-  };
-}
-
-function buildTemplateDefinition(folder) {
-  if (Array.isArray(folder?.template)) {
-    const fields = folder.template.map(normalizeTemplateField);
-    const primaryDateField = fields.find((field) => field.type === "date")?.key || "";
-
-    return {
-      key: folder?.templateKey || folder?.type || folder?._id || crypto.randomUUID(),
-      name: folder?.templateName || folder?.name || "Custom Template",
-      primaryDateField,
-      fields
-    };
-  }
-
-  const candidate =
-    folder?.template ||
-    folder?.templateKey ||
-    folder?.template_name ||
-    folder?.templateName ||
-    folder?.type;
-
-  return {
-    key: String(candidate || folder?._id || folder?.id || crypto.randomUUID()),
-    name: folder?.templateName || folder?.name || "Custom Template",
-    primaryDateField: "",
-    fields: []
-  };
-}
-
-function normalizeFolder(folder, index = 0) {
-  const templateDefinition = buildTemplateDefinition(folder);
-
-  return {
-    ...folder,
-    id: folder?.id || folder?._id || folder?.folderId || `folder-${index}`,
-    name: folder?.name || folder?.folderName || folder?.title || `Folder ${index + 1}`,
-    templateDefinition,
-    template: templateDefinition.key,
-    color: normalizeFolderColor(folder?.color || folder?.folderColor || folder?.bgColor),
-    entries: Array.isArray(folder?.entries) ? folder.entries : []
-  };
-}
-
-function getFoldersFromResponse(payload) {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.folders)) return payload.folders;
-  if (Array.isArray(payload?.data?.folders)) return payload.data.folders;
-  if (Array.isArray(payload?.results)) return payload.results;
-
-  return [];
-}
-
-function readFolders() {
-  if (typeof window === "undefined") return [];
-
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (!stored) return [];
-
-  try {
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function mergeFolderWithStoredData(folder, storedFolders) {
-  const matchingStoredFolder = storedFolders.find((storedFolder) => {
-    const storedId = storedFolder?.id || storedFolder?._id || storedFolder?.folderId;
-    const incomingId = folder?.id || folder?._id || folder?.folderId;
-
-    return String(storedId) === String(incomingId);
-  });
-
-  if (!matchingStoredFolder) return folder;
-
-  return {
-    ...matchingStoredFolder,
-    ...folder,
-    template: folder?.template ?? matchingStoredFolder?.template,
-    templateDefinition: folder?.templateDefinition ?? matchingStoredFolder?.templateDefinition,
-    entries: Array.isArray(folder?.entries) ? folder.entries : matchingStoredFolder?.entries
-  };
-}
+import { getFoldersFromResponse, normalizeFolder } from "./utils/folderData.js";
 
 export default function Folders() {
   const navigate = useNavigate();
   const [folderModalOpen, setFolderModalOpen] = useState(false);
-  const [folders, setFolders] = useState(readFolders);
+  const [folders, setFolders] = useState([]);
   const [isLoadingFolders, setIsLoadingFolders] = useState(true);
   const [folderError, setFolderError] = useState("");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
@@ -126,10 +29,8 @@ export default function Folders() {
 
       try {
         const response = await folderApi.getFolders();
-        const storedFolders = readFolders();
-        const nextFolders = getFoldersFromResponse(response)
-          .map((folder) => mergeFolderWithStoredData(folder, storedFolders))
-          .map(normalizeFolder);
+        const nextFolders =
+          getFoldersFromResponse(response).map(normalizeFolder);
 
         if (!isMounted) return;
 
@@ -153,11 +54,6 @@ export default function Folders() {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
-  }, [folders]);
-
   const createFolder = async ({ name, color, template }) => {
     setIsCreatingFolder(true);
     setFolderError("");
@@ -166,10 +62,14 @@ export default function Folders() {
       const payload = {
         name: name.trim(),
         color: normalizeFolderColor(color),
-        template
+        template,
       };
       const response = await folderApi.createFolder(payload);
-      const createdFolder = response?.data?.folder || response?.folder || response?.data?.data?.folder || payload;
+      const createdFolder =
+        response?.data?.folder ||
+        response?.folder ||
+        response?.data?.data?.folder ||
+        payload;
       const nextFolder = normalizeFolder(createdFolder);
 
       setFolders((currentFolders) => [nextFolder, ...currentFolders]);
@@ -183,7 +83,9 @@ export default function Folders() {
   };
 
   const requestDeleteFolder = (folderId) => {
-    const targetFolder = folders.find((folder) => String(folder.id) === String(folderId));
+    const targetFolder = folders.find(
+      (folder) => String(folder.id) === String(folderId),
+    );
     if (!targetFolder) return;
 
     setFolderPendingDelete(targetFolder);
@@ -198,7 +100,9 @@ export default function Folders() {
     setDeletingFolderId(String(folderId));
     setFolderError("");
     setFolderPendingDelete(null);
-    setFolders((currentFolders) => currentFolders.filter((folder) => String(folder.id) !== String(folderId)));
+    setFolders((currentFolders) =>
+      currentFolders.filter((folder) => String(folder.id) !== String(folderId)),
+    );
 
     try {
       await folderApi.deleteFolder(folderId);
@@ -215,10 +119,15 @@ export default function Folders() {
       <div className="space-y-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-600">Folder Workspace</div>
-            <h1 className="mt-2 text-3xl font-bold text-slate-900">Folders and color-coded entries</h1>
+            <div className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-600">
+              Folder Workspace
+            </div>
+            <h1 className="mt-2 text-3xl font-bold text-slate-900">
+              Folders and color-coded entries
+            </h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">
-              Organize entries into folders, assign a folder color, and manage repeatable records with reminder and snooze controls.
+              Organize entries into folders, assign a folder color, and manage
+              repeatable records with reminder and snooze controls.
             </p>
           </div>
           <button
@@ -238,7 +147,10 @@ export default function Folders() {
         ) : null}
 
         {isLoadingFolders ? (
-          <PageLoader title="Loading Folders" message="Fetching your folder data from the API..." />
+          <PageLoader
+            title="Loading Folders"
+            message="Fetching your folder data from the API..."
+          />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (
@@ -247,7 +159,7 @@ export default function Folders() {
                 folder={folder}
                 isDeleting={deletingFolderId === String(folder.id)}
                 onDelete={() => requestDeleteFolder(folder.id)}
-                onOpen={() => navigate(`/folders/${folder.id}`)}
+                onOpen={() => navigate(`/create-templates/${folder.id}`)}
               />
             ))}
           </div>
@@ -255,8 +167,12 @@ export default function Folders() {
 
         {!isLoadingFolders && !folders.length ? (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-            <div className="text-lg font-semibold text-slate-800">No folders yet</div>
-            <div className="mt-2 text-sm text-slate-500">Create your first folder using the top-right plus action.</div>
+            <div className="text-lg font-semibold text-slate-800">
+              No folders yet
+            </div>
+            <div className="mt-2 text-sm text-slate-500">
+              Create your first folder using the top-right plus action.
+            </div>
           </div>
         ) : null}
       </div>
@@ -298,7 +214,11 @@ export default function Folders() {
       >
         {folderPendingDelete ? (
           <div className="text-sm text-slate-600">
-            Are you sure you want to delete <span className="font-semibold text-slate-900">{folderPendingDelete.name}</span>?
+            Are you sure you want to delete{" "}
+            <span className="font-semibold text-slate-900">
+              {folderPendingDelete.name}
+            </span>
+            ?
           </div>
         ) : null}
       </Modal>

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   UsersIcon,
@@ -9,7 +9,8 @@ import {
   FolderPlusIcon,
   FolderIcon,
   Cog6ToothIcon,
-  XMarkIcon
+  ChevronDownIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/auth/AuthProvider";
 import Modal from "../ui/Modal.jsx";
@@ -19,15 +20,29 @@ const navItems = [
   { to: "/users", label: "Users", icon: UsersIcon },
   { to: "/subscriptions", label: "Subscriptions", icon: CreditCardIcon },
   { to: "/notifications", label: "Notifications", icon: BellAlertIcon },
-  { to: "/folders", label: "Folders", icon: FolderIcon },
+  {
+    to: "/create-templates",
+    label: "Folders",
+    icon: FolderIcon,
+    children: [
+      { to: "/create-templates", label: "Create Templates" },
+      { to: "/requested-templates", label: "Requested Templates" },
+    ],
+  },
   { to: "/reminders", label: "Reminders", icon: FolderPlusIcon },
-  { to: "/activity-logs", label: "Activity Logs", icon: ClipboardDocumentListIcon },
-  { to: "/settings", label: "Settings", icon: Cog6ToothIcon }
+  {
+    to: "/activity-logs",
+    label: "Activity Logs",
+    icon: ClipboardDocumentListIcon,
+  },
+  { to: "/settings", label: "Settings", icon: Cog6ToothIcon },
 ];
 
 export default function Sidebar({ open, onClose }) {
+  const location = useLocation();
   const { user, logout, isLoggingOut } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState({ folders: true });
   const displayName = user?.name || user?.email || "Admin";
   const displayRole = user?.role || "Signed-in user";
   const initials = displayName
@@ -41,25 +56,55 @@ export default function Sidebar({ open, onClose }) {
       "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
       isActive
         ? "bg-slate-900 text-white shadow-sm"
-        : "text-slate-600 hover:bg-slate-100"
+        : "text-slate-600 hover:bg-slate-100",
     ].join(" ");
+  const subLinkClass = ({ isActive }) =>
+    [
+      "ml-11 flex items-center rounded-xl px-3 py-2 text-sm font-medium transition",
+      isActive
+        ? "bg-slate-100 text-slate-900"
+        : "text-slate-500 hover:bg-slate-50 hover:text-slate-700",
+    ].join(" ");
+  const activeParents = useMemo(
+    () =>
+      navItems.reduce((accumulator, item) => {
+        if (!item.children) return accumulator;
+        accumulator[item.to] = item.children.some(
+          (child) =>
+            location.pathname === child.to ||
+            location.pathname.startsWith(`${child.to}/`),
+        );
+        return accumulator;
+      }, {}),
+    [location.pathname],
+  );
+
+  const toggleMenu = (key) => {
+    setExpandedMenus((current) => ({ ...current, [key]: !current[key] }));
+  };
 
   return (
     <>
       <div
-        className={`fixed inset-0 z-30 bg-slate-900/30 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"
-          }`}
+        className={`fixed inset-0 z-30 bg-slate-900/30 transition-opacity lg:hidden ${
+          open ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
         onClick={onClose}
         role="presentation"
       />
       <aside
-        className={`fixed left-0 top-0 z-40 flex h-full w-72 flex-col border-r border-slate-200 bg-white px-6 py-6 transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed left-0 top-0 z-40 flex h-full w-72 flex-col border-r border-slate-200 bg-white px-6 py-6 transition-transform lg:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white p-1 shadow-sm">
-              <img src="/logo.png" alt="44 Snapshot" className="h-full w-full rounded-xl object-contain" />
+              <img
+                src="/logo.png"
+                alt="44 Snapshot"
+                className="h-full w-full rounded-xl object-contain"
+              />
             </div>
             <div>
               <div className="text-base font-semibold">44 Snapshot</div>
@@ -76,7 +121,9 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <div className="mt-6 rounded-2xl bg-slate-50 p-4">
-          <div className="text-xs font-semibold text-slate-400">Signed in as</div>
+          <div className="text-xs font-semibold text-slate-400">
+            Signed in as
+          </div>
           <div className="mt-2 flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-white text-sm font-semibold text-slate-700 shadow-sm">
               {initials}
@@ -91,17 +138,67 @@ export default function Sidebar({ open, onClose }) {
         <nav className="mt-6 flex flex-1 flex-col gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
+
+            if (!item.children) {
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={linkClass}
+                  onClick={onClose}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.label}
+                </NavLink>
+              );
+            }
+
+            const isExpanded =
+              expandedMenus[item.to.slice(1)] ?? activeParents[item.to];
+            const isParentActive = activeParents[item.to];
+
             return (
-              <NavLink key={item.to} to={item.to} className={linkClass} onClick={onClose}>
-                <Icon className="h-5 w-5" />
-                {item.label}
-              </NavLink>
+              <div key={item.to} className="space-y-2">
+                <button
+                  className={[
+                    "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
+                    isParentActive
+                      ? "bg-slate-100 text-slate-900"
+                      : "text-slate-600 hover:bg-slate-100",
+                  ].join(" ")}
+                  onClick={() => toggleMenu(item.to.slice(1))}
+                  type="button"
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="flex-1 text-left">{item.label}</span>
+                  <ChevronDownIcon
+                    className={`h-4 w-4 transition ${isExpanded ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {isExpanded ? (
+                  <div className="space-y-1">
+                    {item.children.map((child) => (
+                      <NavLink
+                        key={child.to}
+                        to={child.to}
+                        className={subLinkClass}
+                        onClick={onClose}
+                      >
+                        {child.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </nav>
 
         <div className="mt-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500">Storage Health</div>
+          <div className="text-xs font-semibold text-slate-500">
+            Storage Health
+          </div>
           <div className="mt-2 text-sm font-semibold">82% used</div>
           <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
             <div className="h-full w-4/5 rounded-full bg-slate-900" />
