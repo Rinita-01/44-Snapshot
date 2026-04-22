@@ -20,10 +20,25 @@ export default function FolderCard({
   const backgroundColor = normalizeFolderColor(folder.color);
   const textColor = getFolderTextColor(backgroundColor);
   const mutedTextColor = getFolderMutedTextColor(backgroundColor);
+  const handleDeleteClick = (event) => {
+    event.stopPropagation();
+    onDelete?.(event);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onOpen?.();
+    }
+  };
 
   return (
     <div
-      className="group rounded-3xl border border-slate-200 p-5 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg"
+      className="group rounded-3xl border border-slate-200 p-5 shadow-sm transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-lg cursor-pointer"
+      onClick={onOpen}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
       style={{ backgroundColor, color: textColor }}
     >
       <div className="flex items-start justify-between gap-3">
@@ -43,7 +58,7 @@ export default function FolderCard({
           {showDeleteAction ? (
             <button
               className="inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm transition disabled:cursor-not-allowed disabled:opacity-60"
-              onClick={onDelete}
+              onClick={handleDeleteClick}
               style={{
                 borderColor:
                   textColor === "#ffffff"
@@ -62,24 +77,18 @@ export default function FolderCard({
               <TrashIcon className="h-4 w-4" />
             </button>
           ) : null}
-          <button
+          <div
             className="inline-flex h-9 w-9 items-center justify-center rounded-full transition"
-            onClick={onOpen}
             style={{ color: mutedTextColor }}
-            type="button"
-            aria-label={`Open ${folder.name}`}
+            aria-hidden="true"
           >
             <ChevronRightIcon className="h-5 w-5" />
-          </button>
+          </div>
         </div>
       </div>
-      <button
-        className="mt-5 block w-full text-left"
-        onClick={onOpen}
-        type="button"
-      >
+      <div className="mt-5 block w-full text-left">
         <div className="text-lg font-semibold">{folder.name}</div>
-      </button>
+      </div>
     </div>
   );
 }

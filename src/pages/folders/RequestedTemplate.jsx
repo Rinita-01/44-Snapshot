@@ -66,7 +66,7 @@ export default function RequestedTemplate() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-600">
+          <div className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-600">
             Requested Templates
           </div>
           <h1 className="mt-2 text-3xl font-bold text-slate-900">
@@ -98,7 +98,7 @@ export default function RequestedTemplate() {
               className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="flex items-start gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-sky-50 text-sky-600">
+                <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-100 text-amber-600">
                   <DocumentTextIcon className="h-6 w-6" />
                 </div>
                 <div className="min-w-0">

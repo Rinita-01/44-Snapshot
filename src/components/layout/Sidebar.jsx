@@ -97,7 +97,7 @@ export default function Sidebar({ open, onClose }) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white/70 pb-4">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white p-1 shadow-sm">
               <img
@@ -120,7 +120,7 @@ export default function Sidebar({ open, onClose }) {
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-slate-50 p-4">
+        {/* <div className="mt-6 rounded-2xl bg-slate-50 p-4">
           <div className="text-xs font-semibold text-slate-400">
             Signed in as
           </div>
@@ -133,9 +133,9 @@ export default function Sidebar({ open, onClose }) {
               <div className="text-xs text-slate-500">{displayRole}</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        <nav className="mt-6 flex flex-1 flex-col gap-2">
+        <nav className="mt-16 flex flex-1 flex-col gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
 
@@ -195,7 +195,7 @@ export default function Sidebar({ open, onClose }) {
           })}
         </nav>
 
-        <div className="mt-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        {/* <div className="mt-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="text-xs font-semibold text-slate-500">
             Storage Health
           </div>
@@ -210,7 +210,7 @@ export default function Sidebar({ open, onClose }) {
           >
             Upgrade Storage
           </button>
-        </div>
+        </div> */}
 
         <button
           className="mt-4 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
