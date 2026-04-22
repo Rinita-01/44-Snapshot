@@ -99,6 +99,10 @@ axiosInstance.interceptors.response.use(
 
         axiosInstance.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
 
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new Event("auth:refreshed"));
+        }
+
         processQueue(null, newAccessToken);
 
         originalRequest.headers = {

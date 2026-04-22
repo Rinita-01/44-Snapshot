@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import { activityApi } from "../../api";
 import { getApiErrorMessage } from "../../api/helpers.js";
 
@@ -84,9 +85,7 @@ export default function ActivityLogs() {
       ) : null}
 
       {isLoading ? (
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-10 text-center text-sm text-slate-500 shadow-sm">
-          Loading activity logs...
-        </div>
+        <PageLoader title="Loading Activity Logs" message="Fetching activity logs from the server..." />
       ) : (
         <DataTable
           columns={columns}

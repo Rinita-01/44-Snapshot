@@ -1,26 +1,207 @@
-import React, { useState } from "react";
-import { ArrowLeftIcon, PlusIcon } from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link, Navigate, useParams } from "react-router-dom";
-import DynamicEntryForm from "../../features/reminders/components/DynamicEntryForm.jsx";
-import EntryCard from "../../features/reminders/components/EntryCard.jsx";
-import { useFolderStore } from "../../features/folders/context/FolderContext.jsx";
-import { getFolderMutedTextColor, getFolderTextColor, normalizeFolderColor } from "../../features/folders/utils/folderColors.js";
+import { folderApi } from "@/api";
+import { getApiErrorMessage } from "@/api/helpers";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import TemplateEditor from "./components/TemplateEditor.jsx";
+import { getFolderMutedTextColor, getFolderTextColor, normalizeFolderColor } from "./utils/folderColors.js";
+
+const STORAGE_KEY = "snapshot-folders";
+
+function normalizeTemplateField(field, index = 0) {
+  return {
+    label: field?.label || `Field ${index + 1}`,
+    key: field?.key || `field_${index + 1}`,
+    type: field?.type || "text",
+    required: Boolean(field?.required),
+    options: Array.isArray(field?.options) ? field.options : [],
+    _id: field?._id
+  };
+}
+
+function buildTemplateDefinition(folder) {
+  if (Array.isArray(folder?.template)) {
+    const fields = folder.template.map(normalizeTemplateField);
+    const primaryDateField = fields.find((field) => field.type === "date")?.key || "";
+
+    return {
+      key: folder?.templateKey || folder?.type || folder?._id || crypto.randomUUID(),
+      name: folder?.templateName || folder?.name || "Custom Template",
+      primaryDateField,
+      fields
+    };
+  }
+
+  const candidate =
+    folder?.template ||
+    folder?.templateKey ||
+    folder?.template_name ||
+    folder?.templateName ||
+    folder?.type;
+
+  return {
+    key: String(candidate || folder?._id || folder?.id || crypto.randomUUID()),
+    name: folder?.templateName || folder?.name || "Custom Template",
+    primaryDateField: "",
+    fields: []
+  };
+}
+
+function normalizeFolder(folder, index = 0) {
+  const templateDefinition = buildTemplateDefinition(folder);
+
+  return {
+    ...folder,
+    id: folder?.id || folder?._id || folder?.folderId || `folder-${index}`,
+    name: folder?.name || folder?.folderName || folder?.title || `Folder ${index + 1}`,
+    templateDefinition,
+    template: templateDefinition.key,
+    color: normalizeFolderColor(folder?.color || folder?.folderColor || folder?.bgColor)
+  };
+}
+
+function getFolderFromResponse(payload) {
+  if (!payload) return null;
+  if (payload.folder && typeof payload.folder === "object") return payload.folder;
+  if (payload.data?.folder && typeof payload.data.folder === "object") return payload.data.folder;
+  if (payload.data && typeof payload.data === "object" && !Array.isArray(payload.data)) return payload.data;
+  if (payload.result && typeof payload.result === "object") return payload.result;
+
+  return null;
+}
+
+function readFolders() {
+  if (typeof window === "undefined") return [];
+
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+  if (!stored) return [];
+
+  try {
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function mergeFolderWithStoredData(folder, storedFolders) {
+  const matchingStoredFolder = storedFolders.find((storedFolder) => {
+    const storedId = storedFolder?.id || storedFolder?._id || storedFolder?.folderId;
+    const incomingId = folder?.id || folder?._id || folder?.folderId;
+
+    return String(storedId) === String(incomingId);
+  });
+
+  if (!matchingStoredFolder) return folder;
+
+  return {
+    ...matchingStoredFolder,
+    ...folder,
+    template: folder?.template ?? matchingStoredFolder?.template,
+    templateDefinition: folder?.templateDefinition ?? matchingStoredFolder?.templateDefinition,
+    entries: Array.isArray(folder?.entries) ? folder.entries : matchingStoredFolder?.entries
+  };
+}
 
 export default function FolderDetails() {
   const { folderId } = useParams();
-  const [entryModalOpen, setEntryModalOpen] = useState(false);
-  const { getFolderById, templates, addEntries, snoozeEntry, snoozeOptions } = useFolderStore();
+  const [folder, setFolder] = useState(null);
+  const [isLoadingFolders, setIsLoadingFolders] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [folderError, setFolderError] = useState("");
+  const [isUpdatingFolder, setIsUpdatingFolder] = useState(false);
 
-  const folder = getFolderById(folderId);
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchFolder = async () => {
+      setIsLoadingFolders(true);
+      setFolderError("");
+
+      try {
+        const response = await folderApi.getFolderById(folderId);
+        const storedFolders = readFolders();
+        const fetchedFolder = getFolderFromResponse(response);
+
+        if (!fetchedFolder) {
+          throw new Error("Folder not found.");
+        }
+
+        const nextFolder = normalizeFolder(mergeFolderWithStoredData(fetchedFolder, storedFolders));
+
+        if (!isMounted) return;
+
+        setFolder(nextFolder);
+      } catch (error) {
+        if (isMounted) {
+          setFolderError(getApiErrorMessage(error, "Failed to load folders."));
+          setFolder(null);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingFolders(false);
+          setInitialLoad(false);
+        }
+      }
+    };
+
+    fetchFolder();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [folderId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const storedFolders = readFolders();
+    const nextFolders = folder
+      ? [
+        folder,
+        ...storedFolders.filter((item) => String(item.id || item._id || item.folderId) !== String(folder.id))
+      ]
+      : storedFolders;
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextFolders));
+  }, [folder]);
+
+  if (initialLoad || (isLoadingFolders && !folder)) {
+    return <PageLoader title="Loading Folder" message="Opening folder details..." />;
+  }
 
   if (!folder) {
     return <Navigate to="/folders" replace />;
   }
 
-  const template = templates[folder.template];
+  const template = folder.templateDefinition;
   const backgroundColor = normalizeFolderColor(folder.color);
   const textColor = getFolderTextColor(backgroundColor);
   const mutedTextColor = getFolderMutedTextColor(backgroundColor);
+
+  const updateTemplate = async (fields) => {
+    setIsUpdatingFolder(true);
+    setFolderError("");
+
+    try {
+      const payload = {
+        name: folder.name,
+        color: folder.color,
+        template: fields
+      };
+
+      const response = await folderApi.updateFolder(payload, folder.id);
+      const updatedFolder = response?.data?.folder || response?.folder || response?.data?.data?.folder || { ...folder, template: fields };
+      const normalizedFolder = normalizeFolder(updatedFolder);
+
+      setFolder(normalizedFolder);
+    } catch (error) {
+      setFolderError(getApiErrorMessage(error, "Failed to update folder template."));
+      throw error;
+    } finally {
+      setIsUpdatingFolder(false);
+    }
+  };
 
   return (
     <>
@@ -36,50 +217,24 @@ export default function FolderDetails() {
             </Link>
             <h1 className="mt-2 text-3xl font-bold">{folder.name}</h1>
             <p className="mt-2 max-w-2xl text-sm" style={{ color: mutedTextColor }}>
-              Add one or many entries from this folder. The plus action on this page is reserved for entry creation only.
+              This page edits the template only. The mobile app will be responsible for filling this form with actual values.
             </p>
           </div>
-          <button
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl px-5 text-sm font-semibold shadow-sm"
-            onClick={() => setEntryModalOpen(true)}
-            style={{ backgroundColor: textColor, color: backgroundColor }}
-            type="button"
-          >
-            <PlusIcon className="h-5 w-5" />
-            Add Entry
-          </button>
         </div>
 
-        {folder.entries.length ? (
-          <div className="space-y-4">
-            {folder.entries.map((entry) => (
-              <EntryCard
-                entry={entry}
-                key={entry.id}
-                onSnooze={(snoozeValue) => snoozeEntry(folder.id, entry.id, snoozeValue)}
-                snoozeOptions={snoozeOptions}
-                template={template}
-              />
-            ))}
+        {folderError ? (
+          <div className="rounded-3xl border border-rose-200 bg-rose-50 p-5 text-sm text-rose-700 shadow-sm">
+            {folderError}
           </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center shadow-sm">
-            <div className="text-lg font-semibold text-slate-800">No entries in this folder yet</div>
-            <div className="mt-2 text-sm text-slate-500">Use the top-right plus action to add one or more entries.</div>
-          </div>
-        )}
-      </div>
+        ) : null}
 
-      <DynamicEntryForm
-        folderName={folder.name}
-        onClose={() => setEntryModalOpen(false)}
-        onSubmit={async (entries) => {
-          await addEntries(folder.id, entries);
-          setEntryModalOpen(false);
-        }}
-        open={entryModalOpen}
-        template={template}
-      />
+        <TemplateEditor
+          folderName={folder.name}
+          fields={template.fields}
+          isSubmitting={isUpdatingFolder}
+          onSubmit={updateTemplate}
+        />
+      </div>
     </>
   );
 }

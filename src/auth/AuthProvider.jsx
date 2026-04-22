@@ -1,112 +1,85 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { AuthContext } from "./auth-context";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
 import { clearAccessToken, getAccessToken, setAccessToken } from "@/auth/session";
 
-const getAccessTokenFromResponse = (data) =>
-  data?.accessToken || data?.token || data?.data?.accessToken || data?.data?.token;
+const AuthContext = createContext(undefined);
 
-const getUserFromResponse = (data) =>
-  data?.user || data?.data?.user || data?.profile || data?.data?.profile;
-
-const buildNameFromEmail = (email) => {
-  if (!email) return "";
-
-  const namePart = email.split("@")[0] || "";
-  return namePart
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((part) => part[0]?.toUpperCase() + part.slice(1))
-    .join(" ");
-};
-
-const normalizeUser = (user, email) => {
-  if (user && typeof user === "object") {
-    const nextUser = { ...user };
-    const resolvedEmail = nextUser.email || email;
-
-    if (!nextUser.email && resolvedEmail) nextUser.email = resolvedEmail;
-    if (!nextUser.name && resolvedEmail) {
-      nextUser.name = buildNameFromEmail(resolvedEmail) || resolvedEmail;
-    }
-
-    return nextUser;
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
   }
-
-  if (!email) return null;
-  const name = buildNameFromEmail(email);
-
-  return { name: name || email, email };
-};
-
-const resolveUser = (payload, email) =>
-  normalizeUser(getUserFromResponse(payload) ?? payload, email);
+  return context;
+}
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadProfile = async () => {
+    try {
+      const profileRes = await authApi.profile();
+      setUser(profileRes?.data);
+    } catch {
+      // Profile loading failed
+    }
+  };
 
+  const applyLoggedOutState = () => {
+    clearAccessToken();
+    setIsAuthenticated(false);
+    setUser(null);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
     const hydrateSession = async () => {
       try {
         const storedToken = getAccessToken();
 
         if (storedToken) {
-          if (isMounted) setIsAuthenticated(true);
-          const profile = await authApi.profile().catch(() => null);
-          if (isMounted) setUser(resolveUser(profile));
-          return;
-        }
+          setIsAuthenticated(true);
+          await loadProfile();
+        } else {
+          const refreshRes = await authApi.refresh();
+          const newAccessToken = refreshRes?.data?.accessToken;
 
-        const data = await authApi.refresh();
-        const newAccessToken = getAccessTokenFromResponse(data);
-
-        if (newAccessToken) {
-          setAccessToken(newAccessToken);
-          if (isMounted) setIsAuthenticated(true);
-          const profile = await authApi.profile().catch(() => null);
-          if (isMounted) setUser(resolveUser(profile));
-        } else if (isMounted) {
-          setIsAuthenticated(false);
-          setUser(null);
+          if (newAccessToken) {
+            setAccessToken(newAccessToken);
+            setIsAuthenticated(true);
+            await loadProfile();
+          } else {
+            applyLoggedOutState();
+            return;
+          }
         }
       } catch {
-        if (isMounted) {
-          clearAccessToken();
-          setIsAuthenticated(false);
-          setUser(null);
-        }
+        applyLoggedOutState();
+        return;
       } finally {
-        if (isMounted) setIsLoading(false);
+        setIsLoading(false);
       }
     };
 
     hydrateSession();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   useEffect(() => {
-    const handleLogout = () => {
-      clearAccessToken();
-      setIsAuthenticated(false);
-      setUser(null);
-      setIsLoading(false);
-    };
+    const handleLogout = () => applyLoggedOutState();
+    const handleRefresh = () => loadProfile();
 
     if (typeof window !== "undefined") {
       window.addEventListener("auth:logout", handleLogout);
+      window.addEventListener("auth:refreshed", handleRefresh);
     }
 
     return () => {
       if (typeof window !== "undefined") {
         window.removeEventListener("auth:logout", handleLogout);
+        window.removeEventListener("auth:refreshed", handleRefresh);
       }
     };
   }, []);
@@ -115,41 +88,32 @@ export function AuthProvider({ children }) {
     setIsLoading(true);
     try {
       const data = await authApi.login({ email, password });
-      const accessToken = getAccessTokenFromResponse(data);
+      const accessToken = data?.data?.accessToken;
 
       if (!accessToken) {
-        setIsAuthenticated(false);
-        setUser(null);
-        return { ok: false, message: "Invalid login response. Please try again." };
+        return { ok: false, message: "Invalid login response" };
       }
 
       setAccessToken(accessToken);
       setIsAuthenticated(true);
+      await loadProfile();
 
-      let nextUser = resolveUser(data, email);
-      if (!nextUser) {
-        const profile = await authApi.profile().catch(() => null);
-        nextUser = resolveUser(profile, email);
-      }
-
-      setUser(nextUser);
       return { ok: true };
     } catch (error) {
-      setIsAuthenticated(false);
-      setUser(null);
-      return { ok: false, message: getApiErrorMessage(error, "Login failed.") };
+      applyLoggedOutState();
+      return { ok: false, message: getApiErrorMessage(error) };
     } finally {
       setIsLoading(false);
     }
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
       await authApi.logout();
     } finally {
-      clearAccessToken();
-      setIsAuthenticated(false);
-      setUser(null);
+      applyLoggedOutState();
+      setIsLoggingOut(false);
     }
   };
 
@@ -157,21 +121,23 @@ export function AuthProvider({ children }) {
     () => ({
       isAuthenticated,
       isLoading,
+      isLoggingOut,
       user,
       login,
       logout,
       refreshProfile: async () => {
         try {
-          const profile = await authApi.profile();
-          const nextUser = resolveUser(profile);
-          setUser(nextUser);
-          return { ok: true, user: nextUser };
+          await loadProfile();
+          return { ok: true, user };
         } catch (error) {
-          return { ok: false, message: getApiErrorMessage(error, "Failed to load profile.") };
+          return {
+            ok: false,
+            message: getApiErrorMessage(error, "Failed to load profile."),
+          };
         }
-      }
+      },
     }),
-    [isAuthenticated, isLoading, user]
+    [isAuthenticated, isLoading, isLoggingOut, user],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
