@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { ChangepasswordApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
 import { useToast } from "@/components/ui/Toast";
@@ -19,6 +20,11 @@ export default function Settings() {
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
+  });
+  const [showPasswords, setShowPasswords] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
   });
   const [preferences, setPreferences] = useState({
     emailSummaries: true,
@@ -48,9 +54,11 @@ export default function Settings() {
 
     try {
       const payload = {
+        oldPassword: passwordForm.currentPassword,
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
-        confirmPassword: passwordForm.confirmPassword
+        confirmPassword: passwordForm.confirmPassword,
+        confirmNewPassword: passwordForm.confirmPassword
       };
 
       const response = await ChangepasswordApi.changePassword(payload);
@@ -138,33 +146,63 @@ export default function Settings() {
           <div className="mt-4 grid gap-4">
             <label className="text-sm text-slate-600">
               Current Password
-              <input
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))}
-                placeholder="Enter current password"
-              />
+              <div className="relative mt-2">
+                <input
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 pr-11 text-sm"
+                  type={showPasswords.currentPassword ? "text" : "password"}
+                  value={passwordForm.currentPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, currentPassword: event.target.value }))}
+                  placeholder="Enter current password"
+                />
+                <button
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-600"
+                  type="button"
+                  onClick={() => togglePasswordVisibility("currentPassword")}
+                  aria-label={showPasswords.currentPassword ? "Hide current password" : "Show current password"}
+                >
+                  {showPasswords.currentPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </div>
             </label>
             <label className="text-sm text-slate-600">
               New Password
-              <input
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                type="password"
-                value={passwordForm.newPassword}
-                onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
-                placeholder="Create a new password"
-              />
+              <div className="relative mt-2">
+                <input
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 pr-11 text-sm"
+                  type={showPasswords.newPassword ? "text" : "password"}
+                  value={passwordForm.newPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, newPassword: event.target.value }))}
+                  placeholder="Create a new password"
+                />
+                <button
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-600"
+                  type="button"
+                  onClick={() => togglePasswordVisibility("newPassword")}
+                  aria-label={showPasswords.newPassword ? "Hide new password" : "Show new password"}
+                >
+                  {showPasswords.newPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </div>
             </label>
             <label className="text-sm text-slate-600">
               Confirm New Password
-              <input
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-                type="password"
-                value={passwordForm.confirmPassword}
-                onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
-                placeholder="Re-enter new password"
-              />
+              <div className="relative mt-2">
+                <input
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 pr-11 text-sm"
+                  type={showPasswords.confirmPassword ? "text" : "password"}
+                  value={passwordForm.confirmPassword}
+                  onChange={(event) => setPasswordForm((prev) => ({ ...prev, confirmPassword: event.target.value }))}
+                  placeholder="Re-enter new password"
+                />
+                <button
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-600"
+                  type="button"
+                  onClick={() => togglePasswordVisibility("confirmPassword")}
+                  aria-label={showPasswords.confirmPassword ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showPasswords.confirmPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                </button>
+              </div>
             </label>
           </div>
           {passwordStatus ? (

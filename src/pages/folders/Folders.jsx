@@ -3,6 +3,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { folderApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
+import Modal from "../../components/ui/Modal.jsx";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
 import { normalizeFolderColor } from "./utils/folderColors.js";
@@ -114,6 +115,7 @@ export default function Folders() {
   const [folderError, setFolderError] = useState("");
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
   const [deletingFolderId, setDeletingFolderId] = useState("");
+  const [folderPendingDelete, setFolderPendingDelete] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -180,16 +182,22 @@ export default function Folders() {
     }
   };
 
-  const deleteFolder = async (folderId) => {
+  const requestDeleteFolder = (folderId) => {
     const targetFolder = folders.find((folder) => String(folder.id) === String(folderId));
     if (!targetFolder) return;
 
-    const confirmed = window.confirm(`Delete "${targetFolder.name}"?`);
-    if (!confirmed) return;
+    setFolderPendingDelete(targetFolder);
+  };
+
+  const deleteFolder = async () => {
+    if (!folderPendingDelete) return;
+
+    const folderId = folderPendingDelete.id;
 
     const previousFolders = folders;
     setDeletingFolderId(String(folderId));
     setFolderError("");
+    setFolderPendingDelete(null);
     setFolders((currentFolders) => currentFolders.filter((folder) => String(folder.id) !== String(folderId)));
 
     try {
@@ -238,7 +246,7 @@ export default function Folders() {
                 key={folder.id}
                 folder={folder}
                 isDeleting={deletingFolderId === String(folder.id)}
-                onDelete={() => deleteFolder(folder.id)}
+                onDelete={() => requestDeleteFolder(folder.id)}
                 onOpen={() => navigate(`/folders/${folder.id}`)}
               />
             ))}
@@ -263,6 +271,37 @@ export default function Folders() {
         open={folderModalOpen}
         isSubmitting={isCreatingFolder}
       />
+
+      <Modal
+        open={Boolean(folderPendingDelete)}
+        title="Delete Folder"
+        onClose={() => setFolderPendingDelete(null)}
+        actions={
+          <>
+            <button
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+              onClick={() => setFolderPendingDelete(null)}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={deleteFolder}
+              type="button"
+              disabled={!folderPendingDelete}
+            >
+              Delete
+            </button>
+          </>
+        }
+      >
+        {folderPendingDelete ? (
+          <div className="text-sm text-slate-600">
+            Are you sure you want to delete <span className="font-semibold text-slate-900">{folderPendingDelete.name}</span>?
+          </div>
+        ) : null}
+      </Modal>
     </>
   );
 }

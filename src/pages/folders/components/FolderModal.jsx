@@ -226,7 +226,7 @@ export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Cre
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400"
                       disabled={isSubmitting}
                       onChange={(event) => updateField(fieldIndex, "label", event.target.value)}
-                      placeholder="Phone Number"
+                      placeholder="Name"
                       type="text"
                       value={field.label}
                     />
@@ -238,7 +238,7 @@ export default function FolderModal({ open, onClose, onSubmit, modalTitle = "Cre
                       className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-slate-400"
                       disabled={isSubmitting}
                       onChange={(event) => updateField(fieldIndex, "key", event.target.value)}
-                      placeholder="phone_number"
+                      placeholder="name"
                       type="text"
                       value={field.key}
                     />

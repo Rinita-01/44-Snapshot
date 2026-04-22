@@ -3,6 +3,7 @@ import { PlusIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
 import { reminderApi } from "../../api/index.js";
 import { getApiErrorMessage } from "../../api/helpers.js";
+import Modal from "../../components/ui/Modal.jsx";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
 import { PageLoader } from "../../components/ui/Skeletons.jsx";
@@ -134,6 +135,7 @@ export default function Reminders() {
   const [error, setError] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [deletingReminderId, setDeletingReminderId] = useState("");
+  const [reminderToDelete, setReminderToDelete] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -200,12 +202,22 @@ export default function Reminders() {
     }
   };
 
-  const deleteReminder = async (folderId) => {
+  const openDeleteModal = (folderId) => {
     const targetFolder = folders.find((folder) => String(folder.id) === String(folderId));
     if (!targetFolder) return;
 
-    const confirmed = window.confirm(`Delete "${targetFolder.name}"?`);
-    if (!confirmed) return;
+    setReminderToDelete(targetFolder);
+  };
+
+  const closeDeleteModal = () => {
+    if (deletingReminderId) return;
+    setReminderToDelete(null);
+  };
+
+  const deleteReminder = async () => {
+    if (!reminderToDelete) return;
+
+    const folderId = reminderToDelete.id;
 
     const previousFolders = folders;
     setDeletingReminderId(String(folderId));
@@ -219,6 +231,7 @@ export default function Reminders() {
       setError(getApiErrorMessage(deleteError, "Failed to delete reminder."));
     } finally {
       setDeletingReminderId("");
+      setReminderToDelete(null);
     }
   };
 
@@ -258,7 +271,7 @@ export default function Reminders() {
                 key={folder.id}
                 folder={folder}
                 isDeleting={deletingReminderId === String(folder.id)}
-                onDelete={() => deleteReminder(folder.id)}
+                onDelete={() => openDeleteModal(folder.id)}
                 onOpen={() => navigate(`/reminders/${folder.id}`)}
               />
             ))}
@@ -282,6 +295,44 @@ export default function Reminders() {
         open={folderModalOpen}
         isSubmitting={isCreating}
       />
+
+      <Modal
+        open={Boolean(reminderToDelete)}
+        title="Delete Reminder"
+        onClose={closeDeleteModal}
+        actions={
+          <>
+            <button
+              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={Boolean(deletingReminderId)}
+              onClick={closeDeleteModal}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-rose-300"
+              disabled={Boolean(deletingReminderId)}
+              onClick={deleteReminder}
+              type="button"
+            >
+              {deletingReminderId ? "Deleting..." : "Delete"}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-slate-600">
+            Are you sure you want to delete
+            {" "}
+            <span className="font-semibold text-slate-900">{reminderToDelete?.name}</span>
+            ?
+          </p>
+          <p className="text-xs text-slate-500">
+            This action will remove the reminder template from the list.
+          </p>
+        </div>
+      </Modal>
     </>
   );
 }
