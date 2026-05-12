@@ -30,7 +30,7 @@ const emptyForm = {
   status: "Active",
   storageUsed: "0 GB",
   lastLogin: "2026-03-12",
-  price: "$0",
+  price: "£0",
   dateOfBirth: "",
 };
 
@@ -76,13 +76,15 @@ const normalizeUser = (user, index = 0) => {
     id: user?.id || user?._id || `user-${index}`,
     name: user?.name || user?.fullName || user?.username || "Unknown",
     email: user?.email || "N/A",
-    joinDate: formatDate(user?.createdAt || user?.joinDate || user?.registeredAt),
+    joinDate: formatDate(
+      user?.createdAt || user?.joinDate || user?.registeredAt,
+    ),
     status:
       user?.status || user?.subscriptionStatus || user?.planStatus || "Active",
     storageUsed:
       user?.storageUsed || user?.storage || user?.storageUsage || "0 GB",
     lastLogin: formatDate(user?.updatedAt || user?.lastLogin || user?.lastSeen),
-    price: user?.price || user?.amount || user?.planPrice || "$0",
+    price: user?.price || user?.amount || user?.planPrice || "£0",
     phone: user?.phone || "N/A",
     businessName: user?.business_name || "N/A",
     role: user?.role || "user",
@@ -455,10 +457,11 @@ export default function Users() {
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
               key={idx}
-              className={`h-8 w-8 rounded-lg border ${page === idx + 1
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200"
-                }`}
+              className={`h-8 w-8 rounded-lg border ${
+                page === idx + 1
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-200"
+              }`}
               onClick={() => setPage(idx + 1)}
             >
               {idx + 1}
@@ -600,7 +603,10 @@ export default function Users() {
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.businessName}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, businessName: event.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    businessName: event.target.value,
+                  }))
                 }
                 disabled={readOnly}
               />
@@ -625,7 +631,10 @@ export default function Users() {
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.dateOfBirth}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, dateOfBirth: event.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    dateOfBirth: event.target.value,
+                  }))
                 }
                 disabled={readOnly}
               />
@@ -723,7 +732,6 @@ export default function Users() {
 
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               {[
-
                 { label: "Email Address", value: form.email },
                 { label: "Phone", value: form.phone },
                 { label: "Business Name", value: form.businessName },
@@ -736,10 +744,11 @@ export default function Users() {
               ].map((item, index, array) => (
                 <div
                   key={item.label}
-                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${index !== array.length - 1
-                    ? "border-b border-slate-200"
-                    : ""
-                    }`}
+                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
+                    index !== array.length - 1
+                      ? "border-b border-slate-200"
+                      : ""
+                  }`}
                 >
                   <div className="text-sm font-medium text-slate-500">
                     {item.label}

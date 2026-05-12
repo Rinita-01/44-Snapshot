@@ -58,7 +58,7 @@ export const users = [
     status: "Active",
     storageUsed: "2.1 GB",
     lastLogin: "2026-03-10",
-    price: "$1,240"
+    price: "£1,240"
   },
   {
     id: "u2",
@@ -68,7 +68,7 @@ export const users = [
     status: "Trial",
     storageUsed: "520 MB",
     lastLogin: "2026-03-09",
-    price: "$0"
+    price: "£0"
   },
   {
     id: "u3",
@@ -78,7 +78,7 @@ export const users = [
     status: "Active",
     storageUsed: "4.8 GB",
     lastLogin: "2026-03-11",
-    price: "$2,980"
+    price: "£2,980"
   },
   {
     id: "u4",
@@ -88,7 +88,7 @@ export const users = [
     status: "Suspended",
     storageUsed: "310 MB",
     lastLogin: "2026-02-18",
-    price: "$640"
+    price: "£640"
   },
   {
     id: "u5",
@@ -98,7 +98,7 @@ export const users = [
     status: "Active",
     storageUsed: "1.3 GB",
     lastLogin: "2026-03-12",
-    price: "$1,420"
+    price: "£1,420"
   },
   {
     id: "u6",
@@ -108,7 +108,7 @@ export const users = [
     status: "Active",
     storageUsed: "3.2 GB",
     lastLogin: "2026-03-08",
-    price: "$2,115"
+    price: "£2,115"
   },
   {
     id: "u7",
@@ -118,7 +118,7 @@ export const users = [
     status: "Active",
     storageUsed: "2.9 GB",
     lastLogin: "2026-03-07",
-    price: "$1,760"
+    price: "£1,760"
   },
   {
     id: "u8",
@@ -128,7 +128,7 @@ export const users = [
     status: "Trial",
     storageUsed: "740 MB",
     lastLogin: "2026-03-06",
-    price: "$0"
+    price: "£0"
   }
 ];
 
@@ -223,8 +223,8 @@ export const activityLogs = [
 ];
 
 export const subscriptionSummary = [
-  { id: "monthly", title: "Monthly Revenue", value: "$68.4K", delta: "+6.1%" },
-  { id: "annual", title: "Annual Revenue", value: "$711K", delta: "+9.4%" },
+  { id: "monthly", title: "Monthly Revenue", value: "£68.4K", delta: "+6.1%" },
+  { id: "annual", title: "Annual Revenue", value: "£711K", delta: "+9.4%" },
   { id: "active", title: "Active Subscriptions", value: "42,915", delta: "+5.6%" },
   { id: "trial", title: "Free Trial Users", value: "3,120", delta: "+2.2%" }
 ];
