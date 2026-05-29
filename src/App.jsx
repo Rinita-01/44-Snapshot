@@ -31,7 +31,18 @@ export default function App() {
             <Route element={<AppLayout />}>
               <Route index element={<Navigate to="/login" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="users" element={<Users />} />
+              <Route
+                path="users"
+                element={<Navigate to="/users/individual" replace />}
+              />
+              <Route
+                path="users/individual"
+                element={<Users userType="individual" />}
+              />
+              <Route
+                path="users/company"
+                element={<Users userType="company" />}
+              />
               <Route path="subscriptions" element={<Subscriptions />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="create-templates" element={<Folders />} />
