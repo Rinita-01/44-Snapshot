@@ -2,15 +2,36 @@ import React, { useState } from "react";
 import StatsCard from "../../components/ui//StatsCard.jsx";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
-import { subscriptionRows as seedRows, subscriptionSummary } from "../../data/dummyData.js";
-import { CreditCardIcon, CurrencyDollarIcon, DocumentArrowDownIcon, PencilSquareIcon, SparklesIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  subscriptionRows as seedRows,
+  subscriptionSummary,
+} from "../../data/dummyData.js";
+import {
+  CreditCardIcon,
+  CurrencyPoundIcon,
+  DocumentArrowDownIcon,
+  PencilSquareIcon,
+  SparklesIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 
-const summaryIcons = [CurrencyDollarIcon, CreditCardIcon, UserGroupIcon, SparklesIcon];
+const summaryIcons = [
+  CurrencyPoundIcon,
+  CreditCardIcon,
+  UserGroupIcon,
+  SparklesIcon,
+];
 
 export default function Subscriptions() {
   const [rows, setRows] = useState(seedRows);
   const [modal, setModal] = useState({ open: false, type: "", row: null });
-  const [form, setForm] = useState({ user: "", plan: "", startDate: "", nextBilling: "", status: "Active" });
+  const [form, setForm] = useState({
+    user: "",
+    plan: "",
+    startDate: "",
+    nextBilling: "",
+    status: "Active",
+  });
 
   const columns = [
     { key: "user", label: "User" },
@@ -22,17 +43,18 @@ export default function Subscriptions() {
       label: "Status",
       render: (row) => (
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === "Active"
-            ? "bg-emerald-50 text-emerald-700"
-            : row.status === "Trial"
-              ? "bg-amber-50 text-amber-700"
-              : "bg-slate-100 text-slate-600"
-            }`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            row.status === "Active"
+              ? "bg-emerald-50 text-emerald-700"
+              : row.status === "Trial"
+                ? "bg-amber-50 text-amber-700"
+                : "bg-slate-100 text-slate-600"
+          }`}
         >
           {row.status}
         </span>
-      )
-    }
+      ),
+    },
   ];
 
   const openInvoice = (row) => setModal({ open: true, type: "invoice", row });
@@ -42,7 +64,7 @@ export default function Subscriptions() {
       plan: row.plan,
       startDate: row.startDate,
       nextBilling: row.nextBilling,
-      status: row.status
+      status: row.status,
     });
     setModal({ open: true, type: "edit", row });
   };
@@ -51,15 +73,23 @@ export default function Subscriptions() {
 
   const handleSave = () => {
     if (!modal.row) return;
-    setRows((prev) => prev.map((item) => (item.id === modal.row.id ? { ...item, ...form } : item)));
+    setRows((prev) =>
+      prev.map((item) =>
+        item.id === modal.row.id ? { ...item, ...form } : item,
+      ),
+    );
     closeModal();
   };
 
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
-        <div className="text-2xl font-semibold">Subscription & Billing Overview</div>
-        <p className="mt-2 text-sm text-slate-500">Monitor revenue performance, plan mix, and billing cycles.</p>
+        <div className="text-2xl font-semibold">
+          Subscription & Billing Overview
+        </div>
+        <p className="mt-2 text-sm text-slate-500">
+          Monitor revenue performance, plan mix, and billing cycles.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -104,24 +134,42 @@ export default function Subscriptions() {
 
       <Modal
         open={modal.open}
-        title={modal.type === "invoice" ? "Generate Invoice" : "Edit Subscription"}
+        title={
+          modal.type === "invoice" ? "Generate Invoice" : "Edit Subscription"
+        }
         onClose={closeModal}
         actions={
           modal.type === "invoice" ? (
             <>
-              <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold"
+                onClick={closeModal}
+                type="button"
+              >
                 Cancel
               </button>
-              <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                onClick={closeModal}
+                type="button"
+              >
                 Generate
               </button>
             </>
           ) : (
             <>
-              <button className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold" onClick={closeModal} type="button">
+              <button
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold"
+                onClick={closeModal}
+                type="button"
+              >
                 Cancel
               </button>
-              <button className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white" onClick={handleSave} type="button">
+              <button
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                onClick={handleSave}
+                type="button"
+              >
                 Save Changes
               </button>
             </>
@@ -130,8 +178,16 @@ export default function Subscriptions() {
       >
         {modal.type === "invoice" && modal.row ? (
           <div className="text-sm text-slate-600">
-            Generate invoice for <span className="font-semibold text-slate-900">{modal.row.user}</span> on plan
-            <span className="font-semibold text-slate-900"> {modal.row.plan}</span>?
+            Generate invoice for{" "}
+            <span className="font-semibold text-slate-900">
+              {modal.row.user}
+            </span>{" "}
+            on plan
+            <span className="font-semibold text-slate-900">
+              {" "}
+              {modal.row.plan}
+            </span>
+            ?
           </div>
         ) : null}
 
@@ -142,7 +198,9 @@ export default function Subscriptions() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.user}
-                onChange={(event) => setForm((prev) => ({ ...prev, user: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, user: event.target.value }))
+                }
               />
             </label>
             <label className="text-sm text-slate-600">
@@ -150,7 +208,9 @@ export default function Subscriptions() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.plan}
-                onChange={(event) => setForm((prev) => ({ ...prev, plan: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, plan: event.target.value }))
+                }
               />
             </label>
             <label className="text-sm text-slate-600">
@@ -158,7 +218,12 @@ export default function Subscriptions() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.startDate}
-                onChange={(event) => setForm((prev) => ({ ...prev, startDate: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    startDate: event.target.value,
+                  }))
+                }
               />
             </label>
             <label className="text-sm text-slate-600">
@@ -166,7 +231,12 @@ export default function Subscriptions() {
               <input
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.nextBilling}
-                onChange={(event) => setForm((prev) => ({ ...prev, nextBilling: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    nextBilling: event.target.value,
+                  }))
+                }
               />
             </label>
             <label className="text-sm text-slate-600">
@@ -174,7 +244,9 @@ export default function Subscriptions() {
               <select
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.status}
-                onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, status: event.target.value }))
+                }
               >
                 <option>Active</option>
                 <option>Trial</option>

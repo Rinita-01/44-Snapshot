@@ -17,7 +17,15 @@ import Modal from "../ui/Modal.jsx";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: HomeIcon },
-  { to: "/users", label: "Users", icon: UsersIcon },
+  {
+    to: "/users",
+    label: "Users",
+    icon: UsersIcon,
+    children: [
+      { to: "/users/individual", label: "Individual User" },
+      { to: "/users/company", label: "Company User" },
+    ],
+  },
   { to: "/subscriptions", label: "Subscriptions", icon: CreditCardIcon },
   { to: "/notifications", label: "Notifications", icon: BellAlertIcon },
   {
@@ -42,7 +50,10 @@ export default function Sidebar({ open, onClose }) {
   const location = useLocation();
   const { user, logout, isLoggingOut } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({ folders: true });
+  const [expandedMenus, setExpandedMenus] = useState({
+    users: true,
+    folders: true,
+  });
   const displayName = user?.name || user?.email || "Admin";
   const displayRole = user?.role || "Signed-in user";
   const initials = displayName
@@ -71,6 +82,7 @@ export default function Sidebar({ open, onClose }) {
         if (!item.children) return accumulator;
         accumulator[item.to] = item.children.some(
           (child) =>
+            location.pathname === item.to ||
             location.pathname === child.to ||
             location.pathname.startsWith(`${child.to}/`),
         );

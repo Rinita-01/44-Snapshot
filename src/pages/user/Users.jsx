@@ -7,9 +7,6 @@ import {
 } from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
-import { userApi } from "../../api";
-import { getApiErrorMessage } from "../../api/helpers.js";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
 
@@ -30,35 +27,139 @@ const emptyForm = {
   status: "Active",
   storageUsed: "0 GB",
   lastLogin: "2026-03-12",
-  price: "$0",
+  price: "GBP 0",
   dateOfBirth: "",
 };
 
-const getUsersFromResponse = (payload) => {
-  if (Array.isArray(payload)) return payload;
-  if (Array.isArray(payload?.data)) return payload.data;
-  if (Array.isArray(payload?.users)) return payload.users;
-  if (Array.isArray(payload?.data?.users)) return payload.data.users;
-  if (Array.isArray(payload?.results)) return payload.results;
+const individualUsers = [
+  {
+    id: "ind-1",
+    name: "Aarav Mehta",
+    email: "aarav.mehta@example.com",
+    phone: "+91 98765 43210",
+    businessName: "N/A",
+    role: "user",
+    joinDate: "12 Mar 2026",
+    status: "Active",
+    storageUsed: "18 GB",
+    lastLogin: "28 May 2026",
+    price: "GBP 19",
+    dateOfBirth: "14 Aug 1994",
+  },
+  {
+    id: "ind-2",
+    name: "Priya Sharma",
+    email: "priya.sharma@example.com",
+    phone: "+91 99887 77665",
+    businessName: "N/A",
+    role: "user",
+    joinDate: "25 Feb 2026",
+    status: "Trial",
+    storageUsed: "6 GB",
+    lastLogin: "27 May 2026",
+    price: "GBP 0",
+    dateOfBirth: "02 Jan 1991",
+  },
+  {
+    id: "ind-3",
+    name: "Rohan Kapoor",
+    email: "rohan.kapoor@example.com",
+    phone: "+91 91234 56789",
+    businessName: "N/A",
+    role: "user",
+    joinDate: "08 Jan 2026",
+    status: "Suspended",
+    storageUsed: "42 GB",
+    lastLogin: "18 May 2026",
+    price: "GBP 29",
+    dateOfBirth: "19 Nov 1988",
+  },
+  {
+    id: "ind-4",
+    name: "Neha Iyer",
+    email: "neha.iyer@example.com",
+    phone: "+91 93456 78120",
+    businessName: "N/A",
+    role: "user",
+    joinDate: "18 Apr 2026",
+    status: "Active",
+    storageUsed: "23 GB",
+    lastLogin: "29 May 2026",
+    price: "GBP 19",
+    dateOfBirth: "27 Jun 1996",
+  },
+];
 
-  return [];
-};
+const companyUsers = [
+  {
+    id: "com-1",
+    name: "Meera Joshi",
+    email: "meera@northstar.co",
+    phone: "+91 90909 11122",
+    businessName: "Northstar Analytics",
+    role: "company admin",
+    joinDate: "02 Mar 2026",
+    status: "Active",
+    storageUsed: "128 GB",
+    lastLogin: "29 May 2026",
+    price: "GBP 149",
+    dateOfBirth: "05 May 1987",
+  },
+  {
+    id: "com-2",
+    name: "Kabir Sethi",
+    email: "kabir@urbanledger.in",
+    phone: "+91 90000 22334",
+    businessName: "Urban Ledger",
+    role: "company user",
+    joinDate: "14 Feb 2026",
+    status: "Trial",
+    storageUsed: "76 GB",
+    lastLogin: "26 May 2026",
+    price: "GBP 0",
+    dateOfBirth: "21 Sep 1990",
+  },
+  {
+    id: "com-3",
+    name: "Ananya Rao",
+    email: "ananya@brightworks.io",
+    phone: "+91 95555 66778",
+    businessName: "Brightworks Studio",
+    role: "company admin",
+    joinDate: "19 Jan 2026",
+    status: "Active",
+    storageUsed: "214 GB",
+    lastLogin: "28 May 2026",
+    price: "GBP 249",
+    dateOfBirth: "11 Dec 1989",
+  },
+  {
+    id: "com-4",
+    name: "Dev Malhotra",
+    email: "dev@orbitfin.com",
+    phone: "+91 94444 88001",
+    businessName: "Orbit Finance",
+    role: "company user",
+    joinDate: "10 Dec 2025",
+    status: "Suspended",
+    storageUsed: "91 GB",
+    lastLogin: "09 May 2026",
+    price: "GBP 149",
+    dateOfBirth: "30 Mar 1985",
+  },
+];
 
-const getUpdatedUserFromResponse = (payload) => {
-  if (!payload || typeof payload !== "object") return null;
-  if (payload.user && typeof payload.user === "object") return payload.user;
-  if (payload.data?.user && typeof payload.data.user === "object")
-    return payload.data.user;
-  if (
-    payload.data &&
-    typeof payload.data === "object" &&
-    !Array.isArray(payload.data)
-  )
-    return payload.data;
-  if (payload.result && typeof payload.result === "object")
-    return payload.result;
-
-  return null;
+const userTypeConfig = {
+  individual: {
+    title: "Individual User Management",
+    description: "Manage individual accounts, subscriptions, and storage consumption.",
+    users: individualUsers,
+  },
+  company: {
+    title: "Company User Management",
+    description: "Manage company accounts, subscriptions, and storage consumption.",
+    users: companyUsers,
+  },
 };
 
 const normalizeUser = (user, index = 0) => {
@@ -76,13 +177,15 @@ const normalizeUser = (user, index = 0) => {
     id: user?.id || user?._id || `user-${index}`,
     name: user?.name || user?.fullName || user?.username || "Unknown",
     email: user?.email || "N/A",
-    joinDate: formatDate(user?.createdAt || user?.joinDate || user?.registeredAt),
+    joinDate: formatDate(
+      user?.createdAt || user?.joinDate || user?.registeredAt,
+    ),
     status:
       user?.status || user?.subscriptionStatus || user?.planStatus || "Active",
     storageUsed:
       user?.storageUsed || user?.storage || user?.storageUsage || "0 GB",
     lastLogin: formatDate(user?.updatedAt || user?.lastLogin || user?.lastSeen),
-    price: user?.price || user?.amount || user?.planPrice || "$0",
+    price: user?.price || user?.amount || user?.planPrice || "GBP 0",
     phone: user?.phone || "N/A",
     businessName: user?.business_name || "N/A",
     role: user?.role || "user",
@@ -91,52 +194,26 @@ const normalizeUser = (user, index = 0) => {
   };
 };
 
-export default function Users() {
-  const [usersData, setUsersData] = useState([]);
+export default function Users({ userType = "individual" }) {
+  const pageConfig = userTypeConfig[userType] || userTypeConfig.individual;
+  const [usersData, setUsersData] = useState(pageConfig.users);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [error, setError] = useState("");
   const [modalError, setModalError] = useState("");
   const [modal, setModal] = useState({ open: false, type: "", user: null });
   const [form, setForm] = useState(emptyForm);
   const pageSize = 6;
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchUsers = async () => {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await userApi.getUsers();
-        const nextUsers = getUsersFromResponse(response).map(normalizeUser);
-
-        if (isMounted) {
-          setUsersData(nextUsers);
-        }
-      } catch (fetchError) {
-        if (isMounted) {
-          setError(getApiErrorMessage(fetchError, "Failed to load users."));
-          setUsersData([]);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchUsers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+    setUsersData(pageConfig.users);
+    setSearch("");
+    setStatus("All");
+    setPage(1);
+    closeModal();
+  }, [pageConfig.users]);
 
   const filtered = useMemo(() => {
     return usersData.filter((user) => {
@@ -249,38 +326,13 @@ export default function Users() {
 
     if (modal.type === "edit" && modal.user) {
       setIsSaving(true);
-      setModalError("");
-
-      try {
-        const payload = {
-          userId: modal.user.id,
-          _id: modal.user._id,
-          name: form.name,
-          email: form.email,
-          joinDate: form.joinDate,
-          status: form.status,
-          storageUsed: form.storageUsed,
-          lastLogin: form.lastLogin,
-          price: form.price,
-        };
-
-        const response = await userApi.updateUser(payload, modal.user.id);
-        const updatedUser = getUpdatedUserFromResponse(response);
-        const nextUser = normalizeUser(
-          updatedUser
-            ? { ...modal.user, ...updatedUser }
-            : { ...modal.user, ...form },
-        );
-
-        setUsersData((prev) =>
-          prev.map((item) => (item.id === modal.user.id ? nextUser : item)),
-        );
-        closeModal();
-      } catch (saveError) {
-        setModalError(getApiErrorMessage(saveError, "Failed to update user."));
-      } finally {
-        setIsSaving(false);
-      }
+      setUsersData((prev) =>
+        prev.map((item) =>
+          item.id === modal.user.id ? { ...modal.user, ...form } : item,
+        ),
+      );
+      setIsSaving(false);
+      closeModal();
 
       return;
     }
@@ -306,28 +358,15 @@ export default function Users() {
     }
 
     setIsDeleting(true);
-    setModalError("");
+    setUsersData((prev) => {
+      const nextUsers = prev.filter((item) => item.id !== modal.user.id);
+      const nextTotalPages = Math.max(1, Math.ceil(nextUsers.length / pageSize));
 
-    try {
-      await userApi.deleteUser({}, userId);
-
-      setUsersData((prev) => {
-        const nextUsers = prev.filter((item) => item.id !== modal.user.id);
-        const nextTotalPages = Math.max(
-          1,
-          Math.ceil(nextUsers.length / pageSize),
-        );
-
-        setPage((currentPage) => Math.min(currentPage, nextTotalPages));
-        return nextUsers;
-      });
-
-      closeModal();
-    } catch (deleteError) {
-      setModalError(getApiErrorMessage(deleteError, "Failed to delete user."));
-    } finally {
-      setIsDeleting(false);
-    }
+      setPage((currentPage) => Math.min(currentPage, nextTotalPages));
+      return nextUsers;
+    });
+    setIsDeleting(false);
+    closeModal();
   };
 
   const readOnly = modal.type === "view";
@@ -342,17 +381,11 @@ export default function Users() {
   return (
     <div className="space-y-6 animate-fade-up">
       <div>
-        <div className="text-2xl font-semibold">User Management</div>
+        <div className="text-2xl font-semibold">{pageConfig.title}</div>
         <p className="mt-2 text-sm text-slate-500">
-          Manage accounts, subscriptions, and storage consumption.
+          {pageConfig.description}
         </p>
       </div>
-
-      {error ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {error}
-        </div>
-      ) : null}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -387,58 +420,51 @@ export default function Users() {
         </button> */}
       </div>
 
-      {loading ? (
-        <PageLoader
-          title="Loading Users"
-          message="Fetching user data from the server..."
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={paginated}
-          emptyMessage="No users found."
-          actions={(row) => (
-            <div className="flex items-center gap-2">
-              <button
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
-                onClick={() => openView(row)}
-                type="button"
-                title="View"
-              >
-                <EyeIcon className="h-4 w-4" />
-                <span className="sr-only">View</span>
-              </button>
-              <button
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
-                onClick={() => openEdit(row)}
-                type="button"
-                title="Edit"
-              >
-                <PencilSquareIcon className="h-4 w-4" />
-                <span className="sr-only">Edit</span>
-              </button>
-              {/* <button
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
-                onClick={() => openSuspend(row)}
-                type="button"
-                title="Suspend"
-              >
-                <PauseCircleIcon className="h-4 w-4" />
-                <span className="sr-only">Suspend</span>
-              </button> */}
-              <button
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
-                onClick={() => openDelete(row)}
-                type="button"
-                title="Delete"
-              >
-                <TrashIcon className="h-4 w-4" />
-                <span className="sr-only">Delete</span>
-              </button>
-            </div>
-          )}
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={paginated}
+        emptyMessage="No users found."
+        actions={(row) => (
+          <div className="flex items-center gap-2">
+            <button
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+              onClick={() => openView(row)}
+              type="button"
+              title="View"
+            >
+              <EyeIcon className="h-4 w-4" />
+              <span className="sr-only">View</span>
+            </button>
+            <button
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+              onClick={() => openEdit(row)}
+              type="button"
+              title="Edit"
+            >
+              <PencilSquareIcon className="h-4 w-4" />
+              <span className="sr-only">Edit</span>
+            </button>
+            {/* <button
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
+              onClick={() => openSuspend(row)}
+              type="button"
+              title="Suspend"
+            >
+              <PauseCircleIcon className="h-4 w-4" />
+              <span className="sr-only">Suspend</span>
+            </button> */}
+            <button
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
+              onClick={() => openDelete(row)}
+              type="button"
+              title="Delete"
+            >
+              <TrashIcon className="h-4 w-4" />
+              <span className="sr-only">Delete</span>
+            </button>
+          </div>
+        )}
+      />
 
       <div className="flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -455,10 +481,11 @@ export default function Users() {
           {Array.from({ length: totalPages }).map((_, idx) => (
             <button
               key={idx}
-              className={`h-8 w-8 rounded-lg border ${page === idx + 1
-                ? "border-slate-900 bg-slate-900 text-white"
-                : "border-slate-200"
-                }`}
+              className={`h-8 w-8 rounded-lg border ${
+                page === idx + 1
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-200"
+              }`}
               onClick={() => setPage(idx + 1)}
             >
               {idx + 1}
@@ -600,7 +627,10 @@ export default function Users() {
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.businessName}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, businessName: event.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    businessName: event.target.value,
+                  }))
                 }
                 disabled={readOnly}
               />
@@ -625,7 +655,10 @@ export default function Users() {
                 className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
                 value={form.dateOfBirth}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, dateOfBirth: event.target.value }))
+                  setForm((prev) => ({
+                    ...prev,
+                    dateOfBirth: event.target.value,
+                  }))
                 }
                 disabled={readOnly}
               />
@@ -723,7 +756,6 @@ export default function Users() {
 
             <div className="overflow-hidden rounded-2xl border border-slate-200">
               {[
-
                 { label: "Email Address", value: form.email },
                 { label: "Phone", value: form.phone },
                 { label: "Business Name", value: form.businessName },
@@ -736,10 +768,11 @@ export default function Users() {
               ].map((item, index, array) => (
                 <div
                   key={item.label}
-                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${index !== array.length - 1
-                    ? "border-b border-slate-200"
-                    : ""
-                    }`}
+                  className={`flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
+                    index !== array.length - 1
+                      ? "border-b border-slate-200"
+                      : ""
+                  }`}
                 >
                   <div className="text-sm font-medium text-slate-500">
                     {item.label}
