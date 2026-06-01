@@ -1,9 +1,16 @@
 export const stats = [
   {
-    id: "totalUsers",
-    title: "Total Users",
-    value: "128,480",
-    delta: "+8.2%",
+    id: "individualUsers",
+    title: "Individual Users",
+    value: "112,000",
+    delta: "+6.8%",
+    caption: "vs Feb 2026"
+  },
+  {
+    id: "companyUsers",
+    title: "Company Users",
+    value: "16,480",
+    delta: "+1.4%",
     caption: "vs Feb 2026"
   },
   {

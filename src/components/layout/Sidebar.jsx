@@ -50,10 +50,7 @@ export default function Sidebar({ open, onClose }) {
   const location = useLocation();
   const { user, logout, isLoggingOut } = useAuth();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState({
-    users: true,
-    folders: true,
-  });
+  const [expandedMenus, setExpandedMenus] = useState({});
   const displayName = user?.name || user?.email || "Admin";
   const displayRole = user?.role || "Signed-in user";
   const initials = displayName

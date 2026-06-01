@@ -10,7 +10,8 @@ import {
   Area
 } from "recharts";
 import {
-  UsersIcon,
+  UserIcon,
+  BuildingOfficeIcon,
   BoltIcon,
   CloudIcon,
   ExclamationTriangleIcon
@@ -21,7 +22,8 @@ import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import { stats, userGrowthData, revenueData, recentActivity } from "../../data/dummyData.js";
 
 const iconMap = {
-  totalUsers: UsersIcon,
+  individualUsers: UserIcon,
+  companyUsers: BuildingOfficeIcon,
   activeSubscriptions: BoltIcon,
   storage: CloudIcon,
   systemAlerts: ExclamationTriangleIcon
