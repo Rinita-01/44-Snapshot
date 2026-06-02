@@ -6,8 +6,8 @@ export default function Topbar() {
   return (
     <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-slate-200 bg-white/70 px-6 py-5 backdrop-blur md:flex-row md:items-center md:justify-between md:px-8">
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-xl bg-white p-1 shadow-sm">
-          <img src="/logo.png" alt="44 Snapshot" className="h-full w-full rounded-lg object-contain" />
+        <div className="grid h-10 w-10 place-items-center bg-white p-1 shadow-sm">
+          <img src="/logo.png" alt="44 Snapshot" className="h-full w-full object-contain" />
         </div>
         <div>
           <div className="text-xl font-bold">Admin Dashboard</div>

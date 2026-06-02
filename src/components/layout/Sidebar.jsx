@@ -108,11 +108,11 @@ export default function Sidebar({ open, onClose }) {
       >
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-white/70 pb-4">
           <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white p-1 shadow-sm">
+            <div className="grid h-11 w-11 place-items-center bg-white p-1 shadow-sm">
               <img
                 src="/logo.png"
                 alt="44 Snapshot"
-                className="h-full w-full rounded-xl object-contain"
+                className="h-full w-full object-contain"
               />
             </div>
             <div>

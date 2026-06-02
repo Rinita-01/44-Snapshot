@@ -6,96 +6,11 @@ import { getApiErrorMessage } from "../../api/helpers.js";
 import { PageLoader } from "../../components/ui/Skeletons.jsx";
 import TemplateEditor from "../folders/components/TemplateEditor.jsx";
 
-function normalizeTemplateField(field, index = 0) {
-  return {
-    label: field?.label || `Field ${index + 1}`,
-    key: field?.key || `field_${index + 1}`,
-    type: field?.type || "text",
-    required: Boolean(field?.required),
-    options: Array.isArray(field?.options) ? field.options : [],
-    _id: field?._id,
-  };
-}
-
-function buildTemplateDefinition(reminder) {
-  if (Array.isArray(reminder?.template)) {
-    const fields = reminder.template.map(normalizeTemplateField);
-
-    return {
-      key:
-        reminder?.templateKey ||
-        reminder?._id ||
-        reminder?.id ||
-        crypto.randomUUID(),
-      name: reminder?.templateName || reminder?.name || "Reminder Template",
-      fields,
-    };
-  }
-
-  return {
-    key:
-      reminder?.templateKey ||
-      reminder?._id ||
-      reminder?.id ||
-      crypto.randomUUID(),
-    name: reminder?.templateName || reminder?.name || "Reminder Template",
-    fields: [],
-  };
-}
-
-function normalizeReminder(reminder, index = 0) {
-  const templateDefinition = buildTemplateDefinition(reminder);
-
-  return {
-    ...reminder,
-    id: reminder?.id || reminder?._id || `reminder-${index}`,
-    name: reminder?.name || reminder?.title || `Reminder Folder ${index + 1}`,
-    templateDefinition,
-    template: templateDefinition.key,
-  };
-}
-
-function normalizeReminderPayloadTemplate(fields) {
-  return (Array.isArray(fields) ? fields : []).map((field) => {
-    const normalizedField = {
-      label: field.label,
-      key: field.key,
-      type: field.type,
-    };
-
-    if (field.required) {
-      normalizedField.required = true;
-    }
-
-    if (Array.isArray(field.options) && field.options.length) {
-      normalizedField.options = field.options;
-    }
-
-    return normalizedField;
-  });
-}
-
-function getReminderFromResponse(payload) {
-  if (!payload) return null;
-  if (payload.folder && typeof payload.folder === "object")
-    return payload.folder;
-  if (payload.reminder && typeof payload.reminder === "object")
-    return payload.reminder;
-  if (payload.data?.folder && typeof payload.data.folder === "object")
-    return payload.data.folder;
-  if (payload.data?.reminder && typeof payload.data.reminder === "object")
-    return payload.data.reminder;
-  if (
-    payload.data &&
-    typeof payload.data === "object" &&
-    !Array.isArray(payload.data)
-  )
-    return payload.data;
-  if (payload.result && typeof payload.result === "object")
-    return payload.result;
-
-  return null;
-}
+import {
+  normalizeReminder,
+  normalizeReminderPayloadTemplate,
+  getReminderFromResponse
+} from "./utils/reminderData.js";
 
 export default function ReminderFolderDetails() {
   const { folderId } = useParams();

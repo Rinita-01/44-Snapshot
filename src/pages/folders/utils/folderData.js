@@ -12,6 +12,10 @@ function normalizeTemplateField(field, index = 0) {
 }
 
 function buildTemplateDefinition(folder) {
+  if (folder?.templateDefinition && Array.isArray(folder.templateDefinition.fields)) {
+    return folder.templateDefinition;
+  }
+
   if (Array.isArray(folder?.template)) {
     const fields = folder.template.map(normalizeTemplateField);
     const primaryDateField = fields.find((field) => field.type === "date")?.key || "";
