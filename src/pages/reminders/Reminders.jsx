@@ -6,7 +6,7 @@ import { getApiErrorMessage } from "../../api/helpers.js";
 import Modal from "../../components/ui/Modal.jsx";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { SkeletonCard } from "../../components/ui/Skeletons.jsx";
 
 import {
   normalizeReminder,
@@ -161,10 +161,11 @@ export default function Reminders() {
         ) : null}
 
         {loading ? (
-          <PageLoader
-            title="Loading Reminders"
-            message="Fetching reminder folders from the server..."
-          />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))}
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (

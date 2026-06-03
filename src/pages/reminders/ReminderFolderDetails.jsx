@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { reminderApi } from "../../api/index.js";
 import { getApiErrorMessage } from "../../api/helpers.js";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { DetailPageSkeleton } from "../../components/ui/Skeletons.jsx";
 import TemplateEditor from "../folders/components/TemplateEditor.jsx";
 
 import {
@@ -63,12 +63,7 @@ export default function ReminderFolderDetails() {
   }, [folderId]);
 
   if (initialLoad || (loading && !folder)) {
-    return (
-      <PageLoader
-        title="Loading Reminder"
-        message="Opening reminder details..."
-      />
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!folder) {

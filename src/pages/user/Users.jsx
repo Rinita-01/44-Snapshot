@@ -9,7 +9,7 @@ import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
 import { userApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { SkeletonTable } from "../../components/ui/Skeletons.jsx";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
 
@@ -377,7 +377,7 @@ export default function Users({ userType = "individual" }) {
       </div>
 
       {isLoading ? (
-        <PageLoader />
+        <SkeletonTable />
       ) : (
         <>
           <DataTable

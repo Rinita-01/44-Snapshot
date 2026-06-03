@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { folderApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { DetailPageSkeleton } from "../../components/ui/Skeletons.jsx";
 import TemplateEditor from "./components/TemplateEditor.jsx";
 import {
   getFolderMutedTextColor,
@@ -61,9 +61,7 @@ export default function FolderDetails() {
   }, [folderId]);
 
   if (initialLoad || (isLoadingFolders && !folder)) {
-    return (
-      <PageLoader title="Loading Folder" message="Opening folder details..." />
-    );
+    return <DetailPageSkeleton />;
   }
 
   if (!folder) {

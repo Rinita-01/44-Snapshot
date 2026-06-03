@@ -7,7 +7,7 @@ import Modal from "../../components/ui/Modal.jsx";
 import FolderModal from "./components/FolderModal.jsx";
 import FolderCard from "./components/FolderCard.jsx";
 import { normalizeFolderColor } from "./utils/folderColors.js";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { SkeletonCard } from "../../components/ui/Skeletons.jsx";
 import { getFoldersFromResponse, normalizeFolder } from "./utils/folderData.js";
 
 export default function Folders() {
@@ -147,10 +147,11 @@ export default function Folders() {
         ) : null}
 
         {isLoadingFolders ? (
-          <PageLoader
-            title="Loading Folders"
-            message="Fetching your folder data from the API..."
-          />
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, idx) => (
+              <SkeletonCard key={idx} />
+            ))}
+          </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { folderApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { SkeletonCard } from "../../components/ui/Skeletons.jsx";
 
 function getRequestedTemplatesFromResponse(payload) {
   if (Array.isArray(payload?.requestTemplates)) return payload.requestTemplates;
@@ -86,10 +86,11 @@ export default function RequestedTemplate() {
       ) : null}
 
       {isLoadingTemplates ? (
-        <PageLoader
-          title="Loading Templates"
-          message="Fetching requested templates from the API..."
-        />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <SkeletonCard key={idx} />
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {templates.map((template) => (

@@ -3,7 +3,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { ChangepasswordApi } from "@/api";
 import { getApiErrorMessage } from "@/api/helpers";
 import { useToast } from "@/components/ui/Toast";
-import { PageLoader } from "../../components/ui/Skeletons.jsx";
+import { DetailPageSkeleton } from "../../components/ui/Skeletons.jsx";
 
 const initialSettings = {
   appName: "44 Snapshot",
@@ -96,12 +96,7 @@ export default function Settings() {
   };
 
   if (isUpdatingPassword) {
-    return (
-      <PageLoader
-        title="Updating Password"
-        message="Please wait while we update your password..."
-      />
-    );
+    return <DetailPageSkeleton />;
   }
 
   return (
