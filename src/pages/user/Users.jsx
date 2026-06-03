@@ -7,6 +7,9 @@ import {
 } from "@heroicons/react/24/outline";
 import DataTable from "../../components/ui/DataTable.jsx";
 import Modal from "../../components/ui/Modal.jsx";
+import { userApi } from "@/api";
+import { getApiErrorMessage } from "@/api/helpers";
+import { PageLoader } from "../../components/ui/Skeletons.jsx";
 
 const statuses = ["All", "Active", "Trial", "Suspended"];
 
@@ -31,134 +34,16 @@ const emptyForm = {
   dateOfBirth: "",
 };
 
-const individualUsers = [
-  {
-    id: "ind-1",
-    name: "Aarav Mehta",
-    email: "aarav.mehta@example.com",
-    phone: "+91 98765 43210",
-    businessName: "N/A",
-    role: "user",
-    joinDate: "12 Mar 2026",
-    status: "Active",
-    storageUsed: "18 GB",
-    lastLogin: "28 May 2026",
-    price: "GBP 19",
-    dateOfBirth: "14 Aug 1994",
-  },
-  {
-    id: "ind-2",
-    name: "Priya Sharma",
-    email: "priya.sharma@example.com",
-    phone: "+91 99887 77665",
-    businessName: "N/A",
-    role: "user",
-    joinDate: "25 Feb 2026",
-    status: "Trial",
-    storageUsed: "6 GB",
-    lastLogin: "27 May 2026",
-    price: "GBP 0",
-    dateOfBirth: "02 Jan 1991",
-  },
-  {
-    id: "ind-3",
-    name: "Rohan Kapoor",
-    email: "rohan.kapoor@example.com",
-    phone: "+91 91234 56789",
-    businessName: "N/A",
-    role: "user",
-    joinDate: "08 Jan 2026",
-    status: "Suspended",
-    storageUsed: "42 GB",
-    lastLogin: "18 May 2026",
-    price: "GBP 29",
-    dateOfBirth: "19 Nov 1988",
-  },
-  {
-    id: "ind-4",
-    name: "Neha Iyer",
-    email: "neha.iyer@example.com",
-    phone: "+91 93456 78120",
-    businessName: "N/A",
-    role: "user",
-    joinDate: "18 Apr 2026",
-    status: "Active",
-    storageUsed: "23 GB",
-    lastLogin: "29 May 2026",
-    price: "GBP 19",
-    dateOfBirth: "27 Jun 1996",
-  },
-];
-
-const companyUsers = [
-  {
-    id: "com-1",
-    name: "Meera Joshi",
-    email: "meera@northstar.co",
-    phone: "+91 90909 11122",
-    businessName: "Northstar Analytics",
-    role: "company admin",
-    joinDate: "02 Mar 2026",
-    status: "Active",
-    storageUsed: "128 GB",
-    lastLogin: "29 May 2026",
-    price: "GBP 149",
-    dateOfBirth: "05 May 1987",
-  },
-  {
-    id: "com-2",
-    name: "Kabir Sethi",
-    email: "kabir@urbanledger.in",
-    phone: "+91 90000 22334",
-    businessName: "Urban Ledger",
-    role: "company user",
-    joinDate: "14 Feb 2026",
-    status: "Trial",
-    storageUsed: "76 GB",
-    lastLogin: "26 May 2026",
-    price: "GBP 0",
-    dateOfBirth: "21 Sep 1990",
-  },
-  {
-    id: "com-3",
-    name: "Ananya Rao",
-    email: "ananya@brightworks.io",
-    phone: "+91 95555 66778",
-    businessName: "Brightworks Studio",
-    role: "company admin",
-    joinDate: "19 Jan 2026",
-    status: "Active",
-    storageUsed: "214 GB",
-    lastLogin: "28 May 2026",
-    price: "GBP 249",
-    dateOfBirth: "11 Dec 1989",
-  },
-  {
-    id: "com-4",
-    name: "Dev Malhotra",
-    email: "dev@orbitfin.com",
-    phone: "+91 94444 88001",
-    businessName: "Orbit Finance",
-    role: "company user",
-    joinDate: "10 Dec 2025",
-    status: "Suspended",
-    storageUsed: "91 GB",
-    lastLogin: "09 May 2026",
-    price: "GBP 149",
-    dateOfBirth: "30 Mar 1985",
-  },
-];
-
 const userTypeConfig = {
   individual: {
     title: "Individual User Management",
     description: "Manage individual accounts, subscriptions, and storage consumption.",
-    users: individualUsers,
+    users: [],
   },
   company: {
     title: "Company User Management",
     description: "Manage company accounts, subscriptions, and storage consumption.",
-    users: companyUsers,
+    users: [],
   },
 };
 
@@ -194,9 +79,18 @@ const normalizeUser = (user, index = 0) => {
   };
 };
 
+const getUsersFromResponse = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.users)) return payload.users;
+  if (Array.isArray(payload?.data?.users)) return payload.data.users;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+};
+
 export default function Users({ userType = "individual" }) {
   const pageConfig = userTypeConfig[userType] || userTypeConfig.individual;
-  const [usersData, setUsersData] = useState(pageConfig.users);
+  const [usersData, setUsersData] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [page, setPage] = useState(1);
@@ -205,15 +99,55 @@ export default function Users({ userType = "individual" }) {
   const [modalError, setModalError] = useState("");
   const [modal, setModal] = useState({ open: false, type: "", user: null });
   const [form, setForm] = useState(emptyForm);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const pageSize = 6;
 
   useEffect(() => {
-    setUsersData(pageConfig.users);
+    let isMounted = true;
+
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      setError("");
+      try {
+        let response;
+        if (userType === "individual") {
+          response = await userApi.getIndividualUsers();
+        } else if (userType === "company") {
+          response = await userApi.getCompanyUsers();
+        } else {
+          response = await userApi.getUsers();
+        }
+
+        const rawUsers = getUsersFromResponse(response);
+        const normalized = rawUsers.map((u, idx) => normalizeUser(u, idx));
+
+        if (isMounted) {
+          setUsersData(normalized);
+        }
+      } catch (err) {
+        console.error("Failed to fetch users:", err);
+        if (isMounted) {
+          setError(getApiErrorMessage(err, "Failed to load users."));
+          setUsersData(pageConfig.users);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchUsers();
     setSearch("");
     setStatus("All");
     setPage(1);
     closeModal();
-  }, [pageConfig.users]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [userType, pageConfig.users]);
 
   const filtered = useMemo(() => {
     return usersData.filter((user) => {
@@ -231,10 +165,7 @@ export default function Users({ userType = "individual" }) {
   const columns = [
     { key: "name", label: "User Name" },
     { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
     { key: "businessName", label: "Business" },
-    { key: "role", label: "Role" },
-    { key: "joinDate", label: "Join Date" },
     { key: "price", label: "Price" },
     {
       key: "status",
@@ -247,8 +178,6 @@ export default function Users({ userType = "individual" }) {
         </span>
       ),
     },
-    { key: "storageUsed", label: "Storage Used" },
-    { key: "lastLogin", label: "Last Login" },
   ];
 
   const openAdd = () => {
@@ -326,14 +255,26 @@ export default function Users({ userType = "individual" }) {
 
     if (modal.type === "edit" && modal.user) {
       setIsSaving(true);
-      setUsersData((prev) =>
-        prev.map((item) =>
-          item.id === modal.user.id ? { ...modal.user, ...form } : item,
-        ),
-      );
-      setIsSaving(false);
-      closeModal();
+      setModalError("");
+      try {
+        const userId = modal.user._id || modal.user.id;
+        const response = await userApi.updateUser(form, userId);
+        const updatedUserRaw = response?.data || response;
+        const updatedUser = normalizeUser(updatedUserRaw);
 
+        setUsersData((prev) =>
+          prev.map((item) =>
+            item.id === modal.user.id || item._id === modal.user._id
+              ? { ...item, ...updatedUser }
+              : item,
+          ),
+        );
+        closeModal();
+      } catch (err) {
+        setModalError(getApiErrorMessage(err, "Failed to update user."));
+      } finally {
+        setIsSaving(false);
+      }
       return;
     }
   };
@@ -358,15 +299,24 @@ export default function Users({ userType = "individual" }) {
     }
 
     setIsDeleting(true);
-    setUsersData((prev) => {
-      const nextUsers = prev.filter((item) => item.id !== modal.user.id);
-      const nextTotalPages = Math.max(1, Math.ceil(nextUsers.length / pageSize));
+    setModalError("");
+    try {
+      await userApi.deleteUser({}, userId);
+      setUsersData((prev) => {
+        const nextUsers = prev.filter(
+          (item) => item.id !== modal.user.id && item._id !== modal.user._id,
+        );
+        const nextTotalPages = Math.max(1, Math.ceil(nextUsers.length / pageSize));
 
-      setPage((currentPage) => Math.min(currentPage, nextTotalPages));
-      return nextUsers;
-    });
-    setIsDeleting(false);
-    closeModal();
+        setPage((currentPage) => Math.min(currentPage, nextTotalPages));
+        return nextUsers;
+      });
+      closeModal();
+    } catch (err) {
+      setModalError(getApiErrorMessage(err, "Failed to delete user."));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const readOnly = modal.type === "view";
@@ -386,6 +336,12 @@ export default function Users({ userType = "individual" }) {
           {pageConfig.description}
         </p>
       </div>
+
+      {error && (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 animate-fade-in">
+          {error}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-1 flex-wrap items-center gap-3">
@@ -420,86 +376,92 @@ export default function Users({ userType = "individual" }) {
         </button> */}
       </div>
 
-      <DataTable
-        columns={columns}
-        data={paginated}
-        emptyMessage="No users found."
-        actions={(row) => (
-          <div className="flex items-center gap-2">
-            <button
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
-              onClick={() => openView(row)}
-              type="button"
-              title="View"
-            >
-              <EyeIcon className="h-4 w-4" />
-              <span className="sr-only">View</span>
-            </button>
-            <button
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
-              onClick={() => openEdit(row)}
-              type="button"
-              title="Edit"
-            >
-              <PencilSquareIcon className="h-4 w-4" />
-              <span className="sr-only">Edit</span>
-            </button>
-            {/* <button
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
-              onClick={() => openSuspend(row)}
-              type="button"
-              title="Suspend"
-            >
-              <PauseCircleIcon className="h-4 w-4" />
-              <span className="sr-only">Suspend</span>
-            </button> */}
-            <button
-              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
-              onClick={() => openDelete(row)}
-              type="button"
-              title="Delete"
-            >
-              <TrashIcon className="h-4 w-4" />
-              <span className="sr-only">Delete</span>
-            </button>
-          </div>
-        )}
-      />
+      {isLoading ? (
+        <PageLoader />
+      ) : (
+        <>
+          <DataTable
+            columns={columns}
+            data={paginated}
+            emptyMessage="No users found."
+            actions={(row) => (
+              <div className="flex items-center gap-2">
+                <button
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                  onClick={() => openView(row)}
+                  type="button"
+                  title="View"
+                >
+                  <EyeIcon className="h-4 w-4" />
+                  <span className="sr-only">View</span>
+                </button>
+                <button
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                  onClick={() => openEdit(row)}
+                  type="button"
+                  title="Edit"
+                >
+                  <PencilSquareIcon className="h-4 w-4" />
+                  <span className="sr-only">Edit</span>
+                </button>
+                {/* <button
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100"
+                  onClick={() => openSuspend(row)}
+                  type="button"
+                  title="Suspend"
+                >
+                  <PauseCircleIcon className="h-4 w-4" />
+                  <span className="sr-only">Suspend</span>
+                </button> */}
+                <button
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-700 transition hover:bg-rose-100"
+                  onClick={() => openDelete(row)}
+                  type="button"
+                  title="Delete"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                  <span className="sr-only">Delete</span>
+                </button>
+              </div>
+            )}
+          />
 
-      <div className="flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          Showing {paginated.length} of {filtered.length} users
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="rounded-lg border border-slate-200 px-3 py-1"
-            disabled={page === 1}
-            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-          >
-            Prev
-          </button>
-          {Array.from({ length: totalPages }).map((_, idx) => (
-            <button
-              key={idx}
-              className={`h-8 w-8 rounded-lg border ${
-                page === idx + 1
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200"
-              }`}
-              onClick={() => setPage(idx + 1)}
-            >
-              {idx + 1}
-            </button>
-          ))}
-          <button
-            className="rounded-lg border border-slate-200 px-3 py-1"
-            disabled={page === totalPages}
-            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-          >
-            Next
-          </button>
-        </div>
-      </div>
+          <div className="flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              Showing {paginated.length} of {filtered.length} users
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className="rounded-lg border border-slate-200 px-3 py-1"
+                disabled={page === 1}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              >
+                Prev
+              </button>
+              {Array.from({ length: totalPages }).map((_, idx) => (
+                <button
+                  key={idx}
+                  className={`h-8 w-8 rounded-lg border ${
+                    page === idx + 1
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200"
+                  }`}
+                  onClick={() => setPage(idx + 1)}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+              <button
+                className="rounded-lg border border-slate-200 px-3 py-1"
+                disabled={page === totalPages}
+                onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
       <Modal
         open={modal.open}
@@ -666,12 +628,12 @@ export default function Users({ userType = "individual" }) {
             <label className="text-sm text-slate-600">
               Join Date
               <input
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
                 value={form.joinDate}
                 onChange={(event) =>
                   setForm((prev) => ({ ...prev, joinDate: event.target.value }))
                 }
-                disabled={readOnly}
+                disabled={true}
               />
             </label>
             <label className="text-sm text-slate-600">
@@ -719,7 +681,7 @@ export default function Users({ userType = "individual" }) {
             <label className="text-sm text-slate-600">
               Last Login
               <input
-                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed"
                 value={form.lastLogin}
                 onChange={(event) =>
                   setForm((prev) => ({
@@ -727,7 +689,7 @@ export default function Users({ userType = "individual" }) {
                     lastLogin: event.target.value,
                   }))
                 }
-                disabled={readOnly}
+                disabled={true}
               />
             </label>
           </div>

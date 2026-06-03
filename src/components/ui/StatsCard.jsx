@@ -9,7 +9,7 @@ export default function StatsCard({ title, value, delta, caption, icon: Icon, ac
       <div>
         <div className="text-xs font-semibold text-slate-500">{title}</div>
         <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
-        <div className="mt-1 text-xs text-slate-500">{caption}</div>
+        {caption ? <div className="mt-1 text-xs text-slate-500">{caption}</div> : null}
       </div>
       <div className="flex flex-col items-end gap-2">
         {Icon ? (

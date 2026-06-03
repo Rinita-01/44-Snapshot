@@ -23,7 +23,7 @@ import StatsCard from "../../components/ui/StatsCard.jsx";
 import ChartCard from "../../components/ui/ChartCard.jsx";
 import { PageLoader, CircleLoader } from "../../components/ui/Skeletons.jsx";
 import { stats, userGrowthData, revenueData } from "../../data/dummyData.js";
-import { folderApi, reminderApi } from "../../api/index.js";
+import { folderApi, reminderApi, dashboardApi } from "../../api/index.js";
 import { getFoldersFromResponse, normalizeFolder } from "../folders/utils/folderData.js";
 import { getReminderFoldersFromResponse, normalizeReminder } from "../reminders/utils/reminderData.js";
 
@@ -73,6 +73,8 @@ export default function Dashboard() {
   const [remindersLoading, setRemindersLoading] = useState(true);
   const [foldersError, setFoldersError] = useState("");
   const [remindersError, setRemindersError] = useState("");
+  const [statsData, setStatsData] = useState(stats);
+  const [growthData, setGrowthData] = useState(userGrowthData);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 700);
@@ -106,8 +108,37 @@ export default function Dashboard() {
       }
     };
 
+    const fetchDashboardData = async () => {
+      try {
+        const response = await dashboardApi.getDashboardData();
+        const dbData = response?.data || response;
+        if (!isMounted) return;
+
+        if (dbData?.userCount) {
+          setStatsData((prev) =>
+            prev.map((item) => {
+              if (item.id === "individualUsers") {
+                return { ...item, value: dbData.userCount.userCount.toLocaleString() };
+              }
+              if (item.id === "companyUsers") {
+                return { ...item, value: dbData.userCount.companyUserCount.toLocaleString() };
+              }
+              return item;
+            })
+          );
+        }
+
+        if (Array.isArray(dbData?.userGrowth)) {
+          setGrowthData(dbData.userGrowth);
+        }
+      } catch (err) {
+        console.error("Failed to load dashboard statistics:", err);
+      }
+    };
+
     fetchFolders();
     fetchReminders();
+    fetchDashboardData();
 
     return () => {
       isMounted = false;
@@ -128,7 +159,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {stats.map((item) => (
+        {statsData.map((item) => (
           <StatsCard
             key={item.id}
             title={item.title}
@@ -148,7 +179,7 @@ export default function Dashboard() {
           action="Last 7 months"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={userGrowthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <AreaChart data={growthData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="userGrowth" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.25} />
