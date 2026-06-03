@@ -21,6 +21,8 @@ export const folderApi = {
 
 export const activityApi = {
   getActivityLogs: () => axiosInstance.get("/activity-logs/activity-logs"),
+  deleteActivityLog: (id) => axiosInstance.delete(`/activity-logs/delete-logs/${id}`),
+  deleteAllActivityLogs: () => axiosInstance.delete("/activity-logs/delete-all-logs"),
 };
 
 export const userApi = {
