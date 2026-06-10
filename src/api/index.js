@@ -82,3 +82,19 @@ export const ChangepasswordApi = {
 export const dashboardApi = {
   getDashboardData: () => axiosInstance.get("/dashboard/dashboard-data"),
 };
+
+export const supportApi = {
+  getSupportRequests: () => axiosInstance.get("/support/support"),
+  getSupportTicketById: (id) => axiosInstance.get(`/support/support/${id}`),
+  updateSupportTicketStatus: (id, status) =>
+    axiosInstance.put(`/support/support/${id}/status`, { status }),
+  deleteSupportRequest: (id) => axiosInstance.delete(`/support/support/${id}`),
+};
+
+export const notificationApi = {
+  getNotifications: () => axiosInstance.get("/notifications/getAll"),
+  markAsRead: (id) => axiosInstance.put(`/notifications/mark-as-read/${id}`),
+  markAllAsRead: () => axiosInstance.put("/notifications/mark-all-as-read"),
+  deleteNotification: (id) => axiosInstance.delete(`/notifications/delete/${id}`),
+  deleteAllNotifications: () => axiosInstance.delete("/notifications/delete-all"),
+};

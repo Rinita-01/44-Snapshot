@@ -17,6 +17,7 @@ import ReminderFolderDetails from "./pages/reminders/ReminderFolderDetails.jsx";
 import Folders from "./pages/folders/Folders.jsx";
 import FolderDetails from "./pages/folders/FolderDetails.jsx";
 import RequestedTemplate from "./pages/folders/RequestedTemplate.jsx";
+import Support from "./pages/support/Support.jsx";
 import { ToastProvider } from "./components/ui/Toast.jsx";
 
 export default function App() {
@@ -60,6 +61,7 @@ export default function App() {
                 element={<ReminderFolderDetails />}
               />
               <Route path="activity-logs" element={<ActivityLogs />} />
+              <Route path="support" element={<Support />} />
               <Route path="settings" element={<Settings />} />
               <Route path="profile" element={<Profile />} />
             </Route>

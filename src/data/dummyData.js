@@ -15,22 +15,19 @@ export const stats = [
     id: "activeSubscriptions",
     title: "Active Subscriptions",
     value: "42,915",
-    delta: "+5.6%",
     caption: "renewals in March"
   },
   {
     id: "storage",
     title: "Storage Usage",
-    value: "812 TB",
-    delta: "+2.4%",
+    value: "0",
     caption: "of 1 PB pool"
   },
   {
-    id: "systemAlerts",
-    title: "System Alerts",
-    value: "18",
-    delta: "-12.5%",
-    caption: "open incidents"
+    id: "requestTemplates",
+    title: "Requested Templates",
+    value: "0",
+    caption: "Templates requested"
   }
 ];
 

@@ -11,6 +11,7 @@ import {
   Cog6ToothIcon,
   ChevronDownIcon,
   XMarkIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/auth/AuthProvider";
 import Modal from "../ui/Modal.jsx";
@@ -43,6 +44,7 @@ const navItems = [
     label: "Activity Logs",
     icon: ClipboardDocumentListIcon,
   },
+  { to: "/support", label: "Support Requests", icon: ChatBubbleLeftRightIcon },
   { to: "/settings", label: "Settings", icon: Cog6ToothIcon },
 ];
 

@@ -43,8 +43,8 @@ const CustomTooltip = ({ active, payload, label, prefix = "", suffix = "" }) => 
       <div className="rounded-2xl border border-slate-100 bg-white/95 p-3 shadow-xl backdrop-blur-sm text-xs font-semibold text-slate-800 animate-fade-in">
         <p className="text-slate-400 text-[10px] font-medium uppercase tracking-wider mb-1.5">{label}</p>
         <p className="flex items-center gap-2">
-          <span 
-            className="h-2 w-2 rounded-full animate-pulse" 
+          <span
+            className="h-2 w-2 rounded-full animate-pulse"
             style={{ backgroundColor: payload[0].stroke || payload[0].color || '#3b82f6' }}
           />
           <span className="font-medium text-slate-500">{payload[0].name}:</span>
@@ -61,7 +61,7 @@ const iconMap = {
   companyUsers: BuildingOfficeIcon,
   activeSubscriptions: BoltIcon,
   storage: CloudIcon,
-  systemAlerts: ExclamationTriangleIcon
+  requestTemplates: FolderIcon
 };
 
 export default function Dashboard() {
@@ -122,6 +122,12 @@ export default function Dashboard() {
               }
               if (item.id === "companyUsers") {
                 return { ...item, value: dbData.userCount.companyUserCount.toLocaleString() };
+              }
+              if (item.id === "storage") {
+                return { ...item, value: dbData.totalStorage.totalStorage.kb.toLocaleString() };
+              }
+              if (item.id === "requestTemplates") {
+                return { ...item, value: dbData.requestTemplateCount.toLocaleString() };
               }
               return item;
             })
