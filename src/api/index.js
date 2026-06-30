@@ -84,10 +84,12 @@ export const dashboardApi = {
 };
 
 export const supportApi = {
-  getSupportRequests: () => axiosInstance.get("/support/support"),
-  getSupportTicketById: (id) => axiosInstance.get(`/support/support/${id}`),
+  getSupportRequests: () => axiosInstance.get("/support/admin/support"),
+  getSupportTicketById: (id) => axiosInstance.get(`/support/admin/support/${id}`),
   updateSupportTicketStatus: (id, status) =>
     axiosInstance.put(`/support/support/${id}/status`, { status }),
+  replyToSupportTicket: (id, message) =>
+    axiosInstance.post(`/support/admin/support/${id}/reply`, { message }),
   deleteSupportRequest: (id) => axiosInstance.delete(`/support/support/${id}`),
 };
 
